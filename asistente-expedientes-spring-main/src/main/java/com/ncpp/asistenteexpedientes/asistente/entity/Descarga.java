@@ -31,6 +31,9 @@ public class Descarga implements Serializable{
     private Integer nPorcentajeDescarga;
     private Integer nConteoDescarga;
     private Integer nTotalDescarga;
+    private Integer nPorcentajeCopia;
+    private Integer nConteoCopia;
+    private Integer nTotalCopia;
     private String xMensajeFinal;
     
     // Campos de auditoría
@@ -65,6 +68,18 @@ public class Descarga implements Serializable{
 
     public Integer getTotalDescarga() {
         return nTotalDescarga;
+    }
+
+    public Integer getPorcentajeCopia() {
+        return nPorcentajeCopia;
+    }
+
+    public Integer getConteoCopia() {
+        return nConteoCopia;
+    }
+
+    public Integer getTotalCopia() {
+        return nTotalCopia;
     }
 
     public String getMensajeFinal() {
