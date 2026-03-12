@@ -1,0 +1,40 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main.Main",
+            "projectName": "DonyDriveClient"
+        },
+        {
+            "type": "java",
+            "name": "Main (Jar With Dependencies)",
+            "request": "launch",
+            "mainClass": "Main.Main",
+            "projectName": "DonyDriveClient",
+            "cwd": "${workspaceFolder}/DonyDriveClient",
+            "classPaths": [
+                "${workspaceFolder}/DonyDriveClient/target/classes",
+                "${workspaceFolder}/DonyDriveClient/target/DonyDriveClient-1.0-SNAPSHOT-jar-with-dependencies.jar"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "AsistenteExpedientesApplication",
+            "request": "launch",
+            "mainClass": "com.ncpp.asistenteexpedientes.AsistenteExpedientesApplication",
+            "projectName": "asistente-expedientes"
+        }
+    ]
+}
