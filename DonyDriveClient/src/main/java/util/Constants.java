@@ -14,6 +14,6 @@ public class Constants {
     
     //public static final String IP_SERVER = "10.20.208.7";
     public static final String IP_SERVER =
-            System.getenv().getOrDefault("DONY_SERVER_IP", "192.168.177.102");
+            System.getenv().getOrDefault("DONY_SERVER_IP", "172.17.78.66");
     
 }
