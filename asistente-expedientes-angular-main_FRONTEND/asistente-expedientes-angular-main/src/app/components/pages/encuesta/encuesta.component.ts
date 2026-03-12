@@ -59,15 +59,22 @@ export class EncuestaComponent implements OnInit, AfterViewInit, OnDestroy {
   enviarEncuesta(valor:any){
     let modulo=this.memoriaService.getModulo();
     let persona=this.memoriaService.getPersona();
+    const nIdModulo = (modulo as any)?.nIdModulo ?? (modulo as any)?.idModulo;
+
+    if (!nIdModulo) {
+      console.error('No se encontró nIdModulo/idModulo en memoria para registrar encuesta', modulo);
+      this.mensajeService.goToDespedidaFinal();
+      return;
+    }
 
     // Usar nueva estructura de Encuesta con nomenclatura refactorizada
     // NOTA: Por ahora mantenemos compatibilidad temporal con campos deprecados
     let encuesta:Encuesta={
-      nIdModulo: modulo.nIdModulo,
+      nIdModulo,
       nIdUsuario: 0, // TODO: Implementar búsqueda/creación de usuario antes de enviar
       nCalificacion: valor,
       // Campos deprecados - mantener por compatibilidad temporal
-      idModulo: modulo.nIdModulo,
+      idModulo: nIdModulo,
       dniSece: persona.dni,
       nombreSece: persona.nombre,
       calificacion: valor
