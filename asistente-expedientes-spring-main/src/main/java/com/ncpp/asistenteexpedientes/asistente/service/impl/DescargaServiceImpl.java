@@ -37,8 +37,9 @@ public class DescargaServiceImpl implements DescargaService {
             // SQL refactorizado con nomenclatura met_descarga
             String sql = "INSERT INTO met_descarga(" +
                 "c_key_descarga, x_estado, n_porcentaje_desc, " +
-                "n_conteo_desc, n_total_desc, c_aud_uid" +
-                ") VALUES(?, 'creado', 0, 0, 0, ?)";
+                "n_conteo_desc, n_total_desc, n_porcentaje_copia, " +
+                "n_conteo_copia, n_total_copia, c_aud_uid" +
+                ") VALUES(?, 'creado', 0, 0, 0, 0, 0, 0, ?)";
 
             PreparedStatement pstm = cn.prepareStatement(sql);
             pstm.setString(1, keyDescarga);
@@ -99,7 +100,8 @@ public class DescargaServiceImpl implements DescargaService {
             
             // SQL refactorizado con nomenclatura met_descarga
             String sql = "SELECT n_id_descarga, c_key_descarga, x_estado, " +
-                "n_porcentaje_desc, n_conteo_desc, n_total_desc, x_mensaje_final " +
+                "n_porcentaje_desc, n_conteo_desc, n_total_desc, " +
+                "n_porcentaje_copia, n_conteo_copia, n_total_copia, x_mensaje_final " +
                 "FROM met_descarga WHERE c_key_descarga = ?";
             
             PreparedStatement pstm = cn.prepareStatement(sql);
@@ -113,6 +115,9 @@ public class DescargaServiceImpl implements DescargaService {
                 descarga.setNPorcentajeDescarga(rs.getInt("n_porcentaje_desc"));
                 descarga.setNConteoDescarga(rs.getInt("n_conteo_desc"));
                 descarga.setNTotalDescarga(rs.getInt("n_total_desc"));
+                descarga.setNPorcentajeCopia(rs.getInt("n_porcentaje_copia"));
+                descarga.setNConteoCopia(rs.getInt("n_conteo_copia"));
+                descarga.setNTotalCopia(rs.getInt("n_total_copia"));
                 descarga.setXMensajeFinal(rs.getString("x_mensaje_final"));
             }
             
@@ -175,6 +180,15 @@ public class DescargaServiceImpl implements DescargaService {
                     Util.getPorcentajeDescarga(conteoDescarga, totalDescarga));
                 descarga.setNConteoDescarga(conteoDescarga);
                 descarga.setNTotalDescarga(totalDescarga);
+                if (descarga.getNPorcentajeCopia() == null) {
+                    descarga.setNPorcentajeCopia(0);
+                }
+                if (descarga.getNConteoCopia() == null) {
+                    descarga.setNConteoCopia(0);
+                }
+                if (descarga.getNTotalCopia() == null) {
+                    descarga.setNTotalCopia(0);
+                }
                 
                 System.out.println("[DescargaServiceImpl] Descarga actualizada: " + 
                     descarga.getNIdDescarga());
