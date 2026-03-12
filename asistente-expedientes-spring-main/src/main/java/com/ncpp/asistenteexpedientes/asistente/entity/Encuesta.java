@@ -3,6 +3,7 @@ package com.ncpp.asistenteexpedientes.asistente.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,12 +34,15 @@ public class Encuesta implements Serializable {
     private Long nIdEncuesta;
     
     @Schema(description = "ID del módulo donde se realizó la encuesta", example = "1", required = true)
+    @JsonAlias({"idModulo", "id_modulo", "n_id_modulo"})
     private Long nIdModulo;              // FK a seg_modulo
     
     @Schema(description = "ID del usuario que respondió la encuesta", example = "1", required = true)
+    @JsonAlias({"idUsuario", "id_usuario", "n_id_usuario"})
     private Long nIdUsuario;             // FK a seg_usuario
     
     @Schema(description = "Calificación de 1 a 5", example = "5", required = true, minimum = "1", maximum = "5")
+    @JsonAlias({"calificacion", "n_calificacion"})
     private Integer nCalificacion;
     
     @Schema(description = "Fecha y hora de la encuesta", accessMode = Schema.AccessMode.READ_ONLY)
