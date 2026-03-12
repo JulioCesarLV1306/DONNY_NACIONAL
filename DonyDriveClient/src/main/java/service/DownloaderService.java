@@ -1,5 +1,10 @@
 package service;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.concurrent.TimeUnit;
 import model.Bitacora;
 import model.Descarga;
 import model.Usuario;
@@ -42,14 +47,35 @@ public class DownloaderService {
             @Override
             public void run() {
                 try {
-                    String destino = driveLetra.endsWith("\\") ? driveLetra : driveLetra + "\\";
-                    String sourcePath = "\\\\" + Constants.IP_SERVER + "\\Asistente_Dony\\descargas\\"
-                            + descarga.getNIdDescarga() + "\\*";
-                    String command = "xcopy \"" + sourcePath + "\" \"" + destino + "\" /E /I /Y";
-                    
-                    ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/C", command);
-                    
-                    System.out.println("command: "+command);
+                    String destino = normalizarDestinoDrive(driveLetra);
+                    System.out.println("driveLetra raw: [" + driveLetra + "]");
+                    System.out.println("driveLetra normalizado: [" + destino + "]");
+                    if (destino == null) {
+                        System.out.println("Error! driveLetra inválido");
+                        descargaService.updateCopia(descarga, DescargaService.ESTADO_ERROR_COPIA, 0, 1);
+                        return;
+                    }
+
+                    File destinoDrive = new File(destino);
+                    if (!destinoDrive.exists()) {
+                        System.out.println("Error! la unidad destino no existe: " + destino);
+                        descargaService.updateCopia(descarga, DescargaService.ESTADO_ERROR_COPIA, 0, 1);
+                        return;
+                    }
+
+                    String sourceDir = resolverOrigenCopia(descarga.getNIdDescarga());
+                    if (sourceDir == null) {
+                        System.out.println("Error! no se encontró directorio de origen para ID descarga: "
+                                + descarga.getNIdDescarga());
+                        descargaService.updateCopia(descarga, DescargaService.ESTADO_ERROR_COPIA, 0, 1);
+                        return;
+                    }
+
+                    ProcessBuilder pb = new ProcessBuilder("robocopy", sourceDir, destino, "/E", "/R:1", "/W:1", "/NFL", "/NDL");
+                    pb.redirectErrorStream(true);
+
+                    System.out.println("robocopy source: " + sourceDir);
+                    System.out.println("robocopy destino: " + destino);
                     
                     
                     try {
@@ -72,17 +98,24 @@ public class DownloaderService {
                     }
 
                     Process p = pb.start();
+                    boolean finished = p.waitFor(15, TimeUnit.MINUTES);
+                    if (!finished) {
+                        p.destroyForcibly();
+                        System.out.println("Error! timeout de copia (15 min)");
+                        descargaService.updateCopia(descarga, DescargaService.ESTADO_ERROR_COPIA, 0, 1);
+                        return;
+                    }
 
-                    p.waitFor();
-                    if (p.exitValue() != 0) {
+                    String processOutput = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    int exitCode = p.exitValue();
+                    if (exitCode > 7) {
                         System.out.println("Error! " + p.exitValue());
-                       System.out.println("Error! " + p.getErrorStream());
+                        System.out.println("robocopy output: " + processOutput);
                        descargaService.updateCopia(descarga, DescargaService.ESTADO_ERROR_COPIA, 0, 1);
                     } else {
+                        System.out.println("robocopy output: " + processOutput);
                         descargaService.updateCopia(descarga, DescargaService.ESTADO_COMPLETO_COPIA, 1, 1);
                     }
-                    
-                     System.out.println("Output! " + p.getOutputStream());
 
                 } catch (Exception e) {
                     System.out.println(e);
@@ -95,6 +128,38 @@ public class DownloaderService {
         hiloCopiaArchivos.start();
 
         return descargaService.updateCopia(descarga, DescargaService.ESTADO_COPIANDO, 0, 0);
+    }
+
+    private String normalizarDestinoDrive(String driveLetra) {
+        if (driveLetra == null) {
+            return null;
+        }
+        String valor = driveLetra.trim().replace("\"", "").replace("/", "\\");
+        Pattern patron = Pattern.compile("([A-Za-z]):");
+        Matcher matcher = patron.matcher(valor);
+        if (!matcher.find()) {
+            return null;
+        }
+        return matcher.group(1).toUpperCase() + ":\\";
+    }
+
+    private String resolverOrigenCopia(Long nIdDescarga) {
+        if (nIdDescarga == null) {
+            return null;
+        }
+
+        String rutaLocalBase = System.getenv().getOrDefault("DONY_DESCARGAS_DIR", "D:\\Asistente_Dony\\descargas");
+        String sourceLocal = rutaLocalBase + "\\" + nIdDescarga;
+        if (new File(sourceLocal).exists()) {
+            return sourceLocal;
+        }
+
+        String sourceRed = "\\\\" + Constants.IP_SERVER + "\\Asistente_Dony\\descargas\\" + nIdDescarga;
+        if (new File(sourceRed).exists()) {
+            return sourceRed;
+        }
+
+        return null;
     }
     
      public Descarga consultar(String ipModulo, String dniPersona, String nUnico, int nIncidente,String keyEleccion, String[] fechas) {
