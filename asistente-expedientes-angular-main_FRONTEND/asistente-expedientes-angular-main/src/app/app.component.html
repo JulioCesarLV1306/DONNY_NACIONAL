@@ -1,0 +1,39 @@
+<div *ngIf="isRecording" style="position: absolute; left: 7%; top: 88%; display: block;">
+    <div style="position: relative; left: -50%; ">
+
+        <div class="recorder-container" style=" position: absolute; z-index: 3;">
+            <div class="outer"></div>
+            <div class="outer-2"></div>
+            <div class="icon-microphone">
+                <fa-icon [icon]="faMicrophone"></fa-icon>
+            </div>
+        </div>
+        <div *ngIf="textWrong!=''" class="text-container " style="position: absolute; z-index: 2;">
+            <div class="text-record">
+                <p style="text-overflow:  ellipsis; height: auto; overflow-x: clip; white-space: nowrap; "> &#10006;
+                    {{textWrong}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<audio #audioMic>
+    <source src='assets/audio/mic-start.mp3' type="audio/mp3">
+</audio>
+
+    <app-spinner></app-spinner>
+    <p-toast position="bottom-left"></p-toast>
+
+    <p-toast position="bottom-left " key="mic"  [baseZIndex]="5000">
+        <ng-template let-message pTemplate="message">
+            <div class="p-flex p-flex-column" style="flex: 1">
+                <div class="p-text-center">
+                    <fa-icon [icon]="faMicrophone"></fa-icon>
+                    <h4 style="font-size: 30px;">{{message.summary}}</h4>
+                    <p style="font-size: 30px;">{{message.detail}}</p>
+                </div>
+            </div>
+        </ng-template>
+    </p-toast>
+
+    <router-outlet>

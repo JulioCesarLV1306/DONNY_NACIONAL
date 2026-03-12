@@ -1,0 +1,41 @@
+<div class="contenedor-superior">
+    <div class="contenedor-video">
+      <video style="height: 100%; display: block; margin: auto;  width: auto; "
+       #video_encuesta>
+        <source  src="http://localhost:4568/videos/ENCUESTA.mp4" type="video/mp4" />
+      </video>
+    </div>
+  </div>
+  <div class="contenedor-inferior" >
+  
+    <div class="contenedor-item">
+        <div style="width:100%" *ngFor="let satisfaccion of listaSatisfaccion; index as i">
+            <div class="item-contenido ">
+                <img src="{{satisfaccion.icono}}">
+                <label class="titulo-encuesta">{{satisfaccion.titulo}}</label>
+            </div>
+        </div>
+    </div>
+      
+  </div>
+
+<!--div class="contenedor-card">
+    <p-card class="cartel" [style]="{'height':'100%','margin':'30px','align-items':'center'}">
+        <div class="contenedor-body">
+            <h1 class="titulo">¿CÓMO TE PARECIÓ <br>LA ATENCIÓN?</h1>
+            <h2 class="tiempo">TIEMPO RESTANTE: s</h2>
+            <div class="contenedor-item">
+                <div style="width:100%" *ngFor="let satisfaccion of listaSatisfaccion; index as i">
+                    <div class="item-contenido ">
+                        <img src="{{satisfaccion.icono}}">
+                        <label style="font-size: 45px; font-weight: bold;">{{satisfaccion.titulo}}</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </p-card>
+</div-->
+
+
+<app-volver></app-volver>

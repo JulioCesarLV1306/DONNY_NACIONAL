@@ -1,0 +1,102 @@
+//paginator
+/* COLUMNS */
+
+.container {
+    width: 100%;
+    max-width: 940px;
+    margin: 0 auto;
+    position: relative;
+    text-align: center;
+    a {
+        text-decoration: none;
+        font-size: 14px;
+    }
+    font-weight: bold;
+}
+
+/* GENERAL STYLES */
+
+.pagination {
+    padding: 30px 0;
+}
+
+.pagination ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.pagination a {
+    display: inline-block;
+    padding: 10px 18px;
+    color: #222;
+}
+
+/* ELEVEN */
+
+.p11 a {
+    background-color: #861e26;
+    margin: auto 5px;
+    color: #fff;
+    border: 3px solid #861e26;
+    position: relative;
+}
+
+.p11 a:first-of-type:before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: -25px;
+    border-top: 22px solid transparent;
+    border-bottom: 22px solid transparent;
+    border-right: 22px solid #861e26;
+}
+
+.p11 a:last-of-type:after {
+    content: "";
+    position: absolute;
+    top: -3px;
+    right: -25px;
+    border-top: 22px solid transparent;
+    border-bottom: 22px solid transparent;
+    border-left: 22px solid #861e26;
+}
+
+//INACTIVE
+.p11 a.inac {
+    background-color: #e8e8e8;
+    border: 3px solid #e8e8e8;
+    color: #cccccc;
+}
+
+.p11 a.inac:first-of-type:before {
+    border-right: 22px solid #e8e8e8;
+}
+
+.p11 a.inac:last-of-type:after {
+    border-left: 22px solid #e8e8e8;
+}
+
+@media only screen and (max-width: 1600px) {
+    .container {
+        a {
+            font-size: 10px;
+        }
+    }
+
+    .pagination a {
+        padding: 7px 15px;
+    }
+    .pagination {
+        padding: 0px 0;
+    }
+
+    .p11 a:last-of-type:after {
+        border-top: 16px solid transparent;
+        border-bottom: 16px solid transparent;
+    }
+    .p11 a:first-of-type:before {
+        border-top: 16px solid transparent;
+        border-bottom: 16px solid transparent;
+    }
+}

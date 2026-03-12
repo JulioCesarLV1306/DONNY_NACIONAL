@@ -1,0 +1,150 @@
+video {
+  border-radius: 0px 25px 25px 0px;
+}
+
+.contenedor-lista {
+  padding-right: 3%;
+  padding-bottom: 4%;
+}
+
+.titulo-lista {
+  padding-top: 16px;
+  color: #861e26;
+  text-align: center;
+  font-size: 60px;
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+.contenedor-item {
+  display: flex;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  flex-direction: column;
+}
+
+.item-contenido {
+  width: 90%;
+  display: flex;
+  img {
+    width: 60px;
+    height: 60px;
+    margin-right: 25px;
+  }
+  p-radiobutton {
+    margin-right: 20px;
+  }
+}
+
+.titulo-expediente {
+  //padding: 16px;
+  color: #861e26;
+  text-align: center;
+  font-size: 30px;
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+::ng-deep .p-card .p-card-body {
+  padding-bottom: 0px;
+  padding-top: 0px;
+  .p-card-content {
+    padding-bottom: 0px;
+    padding-top: 0px;
+  }
+}
+
+.detalle-expediente {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-weight: normal;
+  text-align: center;
+}
+
+.detalle-secretario {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 1.7rem;
+}
+
+.depositos-cdg {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 120px;
+  font-size: 25px;
+  font-weight: normal;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-right: 40px;
+}
+
+.item {
+  height: 50px;
+  margin: 10px;
+  position: relative;
+}
+
+.contenedor-next {
+  border: 2px solid white;
+  background: white;
+  width: 100%;
+  padding: 15px;
+  border-radius: 3px;
+  color: #861e26;
+  transition: background 0.5s ease;
+  display: inline-block;
+  box-sizing: initial;
+}
+
+@keyframes slide1 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(10px, 0);
+  }
+}
+
+.arrow1 {
+  animation: slide1 1s ease-in-out infinite;
+  margin-left: 9px;
+  display: block;
+  float: right;
+  margin-right: 5px;
+}
+
+.titulo-conteo{
+  font-size: 45px;
+}
+
+@media only screen and (max-width: 1600px) {
+  .titulo-lista {
+    font-size: 30px;
+  }
+  .titulo-expediente {
+    font-size: 20px;
+  }
+  .titulo-conteo{
+    font-size: 30px;
+  }
+
+  .detalle-secretario{
+    font-size: 20px;
+  }
+  .item-contenido {
+    img {
+      width: 45px;
+      height: 45px;
+    }
+  }
+}

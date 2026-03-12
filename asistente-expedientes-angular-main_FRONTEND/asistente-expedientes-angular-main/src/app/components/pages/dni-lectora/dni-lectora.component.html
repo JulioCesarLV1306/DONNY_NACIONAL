@@ -1,0 +1,26 @@
+<div class="p-grid" style="height:99vh">
+    <div class="p-col-7 contenedor-izquierdo-padre">
+        <div class="contenedor-izquierdo">
+            <div class="contenedor-logo">
+                <img class="logo" src="assets/img/icologo-white.png">
+            </div>
+            <div class="contenedor-titulo">
+                <h2 style="margin:0px"> DONNY</h2> 
+                <h6 style="margin:0px"> EL ASISTENTE DE<br>
+                    LA CORTE DEl SANTA</h6>
+            </div>
+            <div >
+                <input #inputDni class="ui-hidden-accessible" autoFocus type="text" [(ngModel)]="dniIngresado" (keyup.enter)="buscarPorDNI()" />
+            </div>
+        </div>
+    </div>
+    <div class="p-col-5" style="padding: 30px 0px 20px 0px ">
+            <video controls loop style=" float:right; height: 94vh;" #video_dni_lectora>
+                <source src="http://localhost:4568/videos/DNI-LECTORA.mp4" type="video/mp4" />
+            </video>
+    </div>
+</div>
+
+<label class="version" >
+    v. {{version}}
+</label >

@@ -1,0 +1,146 @@
+video{
+    border-radius:0px 25px 25px 0px;
+}
+
+.contenedor-lista{
+    padding-right: 3%;
+    padding-bottom: 4%;
+    
+}
+
+.titulo-lista{
+    padding-top: 16px;
+    color: #861e26;
+    text-align: center;
+    font-size: 60px;
+    font-weight: normal;
+    margin-bottom: 0px;
+    margin-top:0px;
+}
+
+.titulo-expediente{
+    //padding: 16px;
+    color: #861e26;
+    text-align: center;
+    font-size: 30px;
+    font-weight: normal;
+    margin-bottom: 10px;
+    margin-top:0px;
+}
+
+
+::ng-deep .p-card .p-card-body {
+    padding-bottom: 0px;
+    padding-top: 0px;
+    .p-card-content{
+        padding-bottom: 0px;
+        padding-top: 0px;
+    }
+
+}
+
+.contenedor-fecha{
+    display: flex;
+    padding-bottom: 10px;
+}
+
+.fecha-item{
+    
+    width: 15%;
+    display: flex;
+    p-checkbox{
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+.fecha-contenido{
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+
+
+.wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-right: 40px;
+  }
+  
+  .item {
+    height: 50px;
+    margin: 10px;
+    position: relative;
+  }
+  
+  .contenedor-next {
+    border: 2px solid white;
+    background: white;
+    width: 100%;
+    padding: 15px;
+    border-radius: 3px;
+    color: #861e26;
+    transition: background 0.5s ease;
+    display: inline-block;
+    box-sizing: initial;
+  }
+  
+ 
+  
+  @keyframes slide1 {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+  
+    50% {
+      transform: translate(10px, 0);
+    }
+  }
+  
+  .arrow1 {
+    animation: slide1 1s ease-in-out infinite;
+    margin-left: 9px;
+    display: block; 
+    float: right;
+    margin-right: 5px;
+  }
+
+  .fecha-date{
+    font-size: 20px; 
+    font-weight: bold; 
+    color:  #861e26
+  }
+
+  .fecha-sumilla{
+    font-size: 15px; 
+    font-weight: normal; 
+    max-height:4rem; 
+    overflow: hidden;
+  }
+
+  @media only screen and (max-width: 1600px) {
+    .titulo-lista {
+      font-size: 35px;
+    }
+
+    .titulo-expediente {
+      font-size: 25px;
+    }
+    .fecha-item{
+      h2{
+        font-size: 20px;
+      }
+    }
+    .fecha-date{
+      font-size: 17px; 
+    }
+    .fecha-sumilla{
+      font-size: 13px; 
+    }
+  }
+  

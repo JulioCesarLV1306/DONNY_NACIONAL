@@ -1,0 +1,30 @@
+<div class="contenedor-superior">
+    <div class="contenedor-video">
+        <video  preload="auto"  style="height: 100%; display: block; margin: auto;  width: auto; " #video_pregunta_cuaderno>
+            <source src="http://localhost:4568/videos/PREGUNTA-CUADERNO.mp4" type="video/mp4" />
+        </video>
+
+    </div>
+</div>
+<div class="contenedor-inferior">
+    
+    <p-card [style]="{'padding-left':'50px','padding-right':'50px'}">
+        <h1 style="text-align: center; width: 100%; margin-bottom: 0px;  margin-top: 0px;">{{numero}}-{{anio}}</h1>
+        <div class="eleccion">
+            <div class="eleccion-item">
+                <p-radioButton [value]="1" [(ngModel)]="goToCuaderno" (onClick)="eventEleccion()"></p-radioButton>
+                <label><i class="pi pi-check-circle " style="font-size: 2.5rem; color: green;"></i> Sí</label>
+            </div>
+        
+        </div>
+        <div class="eleccion">
+            <div class="eleccion-item">
+                <p-radioButton [value]="0" [(ngModel)]="goToCuaderno" (onClick)="eventEleccion()"></p-radioButton>
+                <label><i class="pi pi-times-circle " style="font-size: 2.5rem; color: #861e26;"></i> No</label>
+            </div>
+        </div>
+    </p-card>
+   
+</div>
+
+<app-volver volverRoute="ingrese-expediente/anio"></app-volver>

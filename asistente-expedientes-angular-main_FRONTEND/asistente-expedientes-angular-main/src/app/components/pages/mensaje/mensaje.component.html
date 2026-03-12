@@ -1,0 +1,20 @@
+<div class="contenedor-card">
+    <p-card class="cartel" [style]="{'height':'100%','margin':'30px','align-items':'center'}">
+        <div class="contenedor-body">
+
+            <section class="c-container">
+                <div class="o-circle c-container__circle"
+                    [ngClass]="{'o-circle__sign--failure': objMensaje?.tipoMensaje === 'error', 'o-circle__sign--success': objMensaje?.tipoMensaje === 'success' }">
+                    <div class="o-circle__sign"></div>
+                </div>
+            </section>
+
+            <!--div class="contenedor-grafico">
+                <img class="grafico" src="{{objMensaje?.icon}}">
+            </div-->
+
+            <h1 class="titulo" [innerHTML]="objMensaje?.mensaje"></h1>
+        </div>
+
+    </p-card>
+</div>

@@ -1,0 +1,50 @@
+<div class="p-grid" style="height:100vh;padding: 30px 0px 20px 0px">
+    <div class="p-col-5 ">
+      <video preload="auto" style="height: 94vh; float:left" #video_rango_descarga>
+        <source src="http://localhost:4568/videos/RANGO-DESCARGA.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <div class="p-col-7 contenedor-lista">
+      <p-card [style]="{'border-radius':'20px','height':'auto','padding-bottom':'20px'}">
+        <ng-template pTemplate="header">
+          <h1 *ngIf="eleccionActual" class="titulo-lista">FECHAS DE {{eleccionActual}}</h1>
+          
+          <h2  class="titulo-expediente">SE ENCONTRARON {{paginatorTotalRecord}} FECHAS</h2>
+          <h2  class="titulo-expediente">{{expedienteActual.formatoExpediente}}</h2>
+        </ng-template>
+  
+        <div *ngFor="let fecha of listaFechas; index as i" >
+          <p-card [style]="{'border-radius':'10px', 'margin':'15px'}">  
+            <div class="contenedor-fecha">
+              <div class="fecha-item" >
+                <h2 style="margin-top: auto;margin-bottom: auto; color:  #861e26">
+                  Fila {{(i+1)}}</h2> 
+                  <p-checkbox [(ngModel)]="checkedListaFechas[i]" [binary]="true"></p-checkbox>
+              </div>
+              <div class="fecha-contenido" >
+                  <label class="fecha-date" >{{fecha.fecha | date:'longDate' }}</label>
+                  <label class="fecha-sumilla" >{{fecha.sumilla}}</label>
+              </div>
+            </div>
+          </p-card>
+          </div>
+  
+          <app-paginator [data]="paginatorDataObj"></app-paginator>
+        
+  
+      </p-card>
+      <div class="wrapper">
+        <div class="item">
+          <div class="contenedor-next">
+            <h2 style="float:left; margin-top: 0; margin-bottom: 0; margin-right: 2px;">DESCARGAR</h2>
+            <fa-icon class ="arrow1" [icon]="faArrow" aria-hidden="true" size="2x"></fa-icon>
+        </div>
+        </div>
+      
+      </div>
+
+    </div>
+  </div>  
+
+  
+<app-volver volverRoute="elegir-archivos"></app-volver>

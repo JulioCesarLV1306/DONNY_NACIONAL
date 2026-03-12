@@ -1,0 +1,49 @@
+<div class="contenedor-card">
+    <p-card class="cartel" [style]="{'height':'100%','margin':'30px','align-items':'center'}">
+        <div class="contenedor-body">
+
+            <div id="steps">
+                <div class="step circle" [ngClass]="{'done': codeEstado >= 1}">
+                    <i *ngIf="codeEstado >= 1" class="pi pi-check pi-2x"></i>
+                    <span *ngIf="codeEstado < 1">1</span>
+                    <label>
+                        TAMAÑO
+                    </label>
+                </div>
+              
+                <div class="step line" [ngClass]="{'done': codeEstado >= 1}"></div>
+
+                <div class="step circle" [ngClass]="{'done': codeEstado >= 2 }">
+                    <i *ngIf="codeEstado >= 2" class="pi pi-check pi-2x"></i>
+                    <span *ngIf="codeEstado < 2">2</span>
+                    <label>
+                        DESCARGA
+                    </label>
+                </div>
+
+                <div class="step line" [ngClass]="{'done': codeEstado >= 2 }"></div>
+                <div class="step circle" [ngClass]="{'done': codeEstado >= 3 }">
+                    <i *ngIf="codeEstado >= 3" class="pi pi-check pi-2x"></i>
+                    <span *ngIf="codeEstado < 3">3</span>
+                    <label>
+                        COPIADO
+                    </label>
+                </div>
+            </div>
+
+            <h1 class="titulo">{{mensaje}}</h1>
+            <div class="contenedor-eleccion" *ngFor="let tamanio of tamaniosDescarga;index as i">
+                <div class="eleccion-contenido">
+                    <label style="font-size: 3.5rem;">{{tamanio.titulo}} ({{tamanio.tamanioHR}})</label>
+                    <i *ngIf="estadosDescarga[i] == 'descargando'" class="pi pi-spin pi-spinner"
+                        style="font-size: 2.5rem"></i>
+
+                    <i *ngIf="estadosDescarga[i] == 'completo-copia'" class="pi pi-check-circle "
+                        style="font-size: 2.5rem; color: green;"></i>
+                    <i *ngIf="estadosDescarga[i] == 'error-descarga' || estadosDescarga[i] == 'error-copia'"
+                        class="pi pi-times-circle " style="font-size: 2.5rem; color: #861e26;"></i>
+                </div>
+            </div>
+        </div>
+    </p-card>
+</div>

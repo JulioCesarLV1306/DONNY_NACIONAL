@@ -1,0 +1,7 @@
+*.class
+*.mp4
+# Ignorar compilados de Java
+target/
+*.jar
+*.war
+*.class

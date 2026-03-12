@@ -1,0 +1,78 @@
+video{
+    border-radius:0px 25px 25px 0px;
+}
+
+.contenedor-lista{
+    padding-right: 3%;
+    padding-bottom: 4%;
+}
+
+.titulo-lista{
+    padding-top: 16px;
+    color: #861e26;
+    text-align: center;
+    font-size: 60px;
+    font-weight: normal;
+    margin-bottom: 0px;
+    margin-top:0px;
+}
+
+.contenedor-item{
+    display: flex;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    flex-direction: column;
+}
+
+.item-contenido{
+    width: 90%;
+    display: flex;
+    img{
+        width: 60px;
+        height: 60px;
+        margin-right: 25px;
+    }
+    p-radioButton{
+        margin-right: 20px;
+    }
+}
+
+::ng-deep .p-card .p-card-body {
+    padding-bottom: 0px;
+    padding-top: 0px;
+    .p-card-content{
+        padding-bottom: 0px;
+        padding-top: 0px;
+    }
+
+}
+
+.titulo-expediente{
+    //padding: 16px;
+    color: #861e26;
+    text-align: center;
+    font-size: 30px;
+    font-weight: normal;
+    margin-bottom: 10px;
+    margin-top:0px;
+}
+
+.especialidad-titulo{
+    font-size: 45px;
+}
+
+@media only screen and (max-width: 1600px) {
+    .titulo-lista {
+      font-size: 40px;
+    }
+    .especialidad-titulo{
+        font-size: 40px;
+    }
+    .item-contenido{
+        img{
+            width: 50px;
+            height: 50px;
+        }
+    }
+  }
+  

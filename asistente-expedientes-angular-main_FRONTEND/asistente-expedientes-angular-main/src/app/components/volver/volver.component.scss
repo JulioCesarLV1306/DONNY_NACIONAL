@@ -1,0 +1,32 @@
+
+
+  
+  .contenedor-next {
+    box-shadow:  5px 6px 4px hsla(0, 0%, 11%, 0.26);
+    background: white;
+    width: auto;
+    padding: 6px;
+    border-radius: 3px;
+    color: #861e26;
+    display: inline-block;
+    box-sizing: initial;
+    margin-right: 10px;
+  }
+  
+ 
+  .icon {
+    margin-left: 9px;
+    display: block; 
+    float: left;
+    margin-right: 5px;
+  }
+
+
+  .coverAll {
+    z-index: 1000;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: auto;
+    padding: 10px;
+}

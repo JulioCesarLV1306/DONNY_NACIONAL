@@ -1,0 +1,73 @@
+.contenedor-superior {
+    height: 100%;
+    padding-top: 0px;
+    margin: 40px;
+    margin-top: 0;
+    background-color: white;
+    border-radius: 0px 0px 25px 25px;
+}
+.contenedor-video {
+    height: 100%;
+    align-content: center;
+}
+.contenedor-inferior {
+    height: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+video {
+    border-radius: 0px 0px 25px 25px;
+}
+.titulo {
+    padding-top: 16px;
+    color: #861e26;
+    text-align: center;
+    font-size: 100px;
+    font-weight: normal;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+.contenedor-body{  
+    width: 90%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+     transform: translate(-50%, -50%);
+}
+
+
+.contenedor-grafico{
+    margin: auto;
+    text-align: center; 
+}
+
+.grafico{
+    height:  400px;
+}
+
+.tiempo{
+    padding: 16px;
+    margin-top: 0;
+    color: #424242;
+    text-align: center;
+    font-size: 70px;
+    margin-bottom: 0px;
+    font-weight: normal;
+}
+
+::ng-deep .p-progressbar {
+
+    .p-progressbar-value{
+        background: #861e26;
+        color: white;
+    }
+
+    .p-progressbar-label{
+        color: whitesmoke;
+       }
+
+}

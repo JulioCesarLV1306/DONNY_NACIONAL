@@ -1,0 +1,21 @@
+<div class="coverAll">
+    <div *ngIf="inicioRoute!='disabled'" class="contenedor-next">
+        <fa-icon class ="icon" [icon]="faInicio" aria-hidden="true" size="2x"></fa-icon>
+        <h2 style="float:left; margin-top: 0; margin-bottom: 0;margin-right: 10px;">INICIO</h2>
+    </div>
+    <div  *ngIf="volverRoute!=''"  class="contenedor-next">
+        <fa-icon class ="icon" [icon]="faVolver" aria-hidden="true" size="2x"></fa-icon>
+        <h2 style="float:left; margin-top: 0; margin-bottom: 0; margin-right: 10px;">VOLVER</h2>
+    </div>
+</div>
+
+
+<!--div class="wrapper">
+    <div class="item">
+      <div class="contenedor-next">
+        <h2 style="float:left; margin-top: 0; margin-bottom: 0; margin-right: 2px;">DESCARGAR</h2>
+        <fa-icon class ="arrow1" [icon]="faVolver" aria-hidden="true" size="1x"></fa-icon>
+    </div>
+    </div>
+  
+  </div-->

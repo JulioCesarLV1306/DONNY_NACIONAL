@@ -1,0 +1,62 @@
+
+.contenedor-superior {
+    height: 70%;
+    padding: 15px;
+    padding-top: 0px;
+}
+
+.contenedor-inferior {
+    height: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.contenedor-video {
+    height: 100%;
+    align-content: center;
+}
+
+video {
+    border-radius: 0px 0px 25px 25px;
+}
+.contenedor-item{
+    display: flex;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    flex-direction: row;
+    background-color: white;
+    border-radius: 15px;
+    
+}
+
+.item-contenido{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 50px;
+    
+    padding-right: 50px;
+    img{
+        width: 180px;
+        height: 180px;
+    }
+}
+
+.titulo-encuesta{
+    font-size: 45px; 
+    font-weight: bold; 
+    color: #424242;
+}
+
+@media only screen and (max-width: 1600px) {
+    .item-contenido{
+        img{
+            width: 100px;
+            height: 100px;
+        }
+    }
+    .titulo-encuesta{
+        font-size: 35px; 
+    }
+}

@@ -1,0 +1,23 @@
+<div class="contenedor-superior">
+    <div *ngIf="!success"  class="contenedor-body"  >
+        <div class="contenedor-grafico">
+            <img class="grafico" src="assets/img/pen-usb.gif">
+        </div>
+
+        <h1 class="titulo" style="font-size: 160px;">EXPULSANDO USB</h1>
+        
+        <h2 class="tiempo">ESPERE UN MOMENTO</h2>
+
+    </div>
+
+    <div  *ngIf="success" class="contenedor-video">
+
+        <video *ngIf="success" #video_despedida_final style="height: 70%;display: block; margin: auto;  width: auto; ">
+            <source src="http://localhost:4568/videos/DESPEDIDA.mp4" type="video/mp4" />
+        </video>
+        <div class="contenedor-inferior">
+            <h1 class="titulo">{{mensaje}}</h1>
+        </div>
+    </div>
+
+</div>

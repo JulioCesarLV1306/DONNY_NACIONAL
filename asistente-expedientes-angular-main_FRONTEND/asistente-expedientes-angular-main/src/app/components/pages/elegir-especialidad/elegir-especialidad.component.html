@@ -1,0 +1,35 @@
+<div class="p-grid" style="height:100vh;padding: 30px 0px 20px 0px">
+    <div class="p-col-5 ">
+      <video preload="auto" style="height: 94vh; float:left" #video_elegir_archivos>
+        <source src="http://localhost:4568/videos/ELEGIR-ESPECIALIDAD.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <div class="p-col-7 contenedor-lista">
+      <p-card [style]="{'border-radius':'20px','height':'auto','padding-bottom':'10px'}">
+        <ng-template pTemplate="header">
+          <h1 class="titulo-lista">ELIJA LA ESPECIALIDAD</h1>
+          <h2  class="titulo-expediente">{{numero}}-{{anio}}-{{cuaderno}}</h2>
+        </ng-template>
+          <div  *ngFor="let eleccionEspecialidad of listaEleccion; index as i">
+          <p-card   [style]="{'border-radius':'10px', 'margin':'25px'}"  >
+            <div class="contenedor-item"> 
+              <div class="item-contenido" >
+                <p-radioButton [value]="eleccionEspecialidad" [(ngModel)]="especialidadSelected"></p-radioButton>
+                  <img src="{{eleccionEspecialidad.icono}}">
+                  <label class="especialidad-titulo" >{{eleccionEspecialidad.titulo}}</label>
+              </div>
+            </div>
+          </p-card>
+        </div>
+  
+      </p-card>
+    </div>
+  </div>  
+
+  <div *ngIf="idTipo==8">
+    <app-volver></app-volver>
+  </div>
+
+  <div *ngIf="idTipo!=8">
+    <app-volver volverRoute="pregunta-cuaderno"></app-volver>
+  </div>

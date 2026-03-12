@@ -1,0 +1,96 @@
+.recorder-container {
+  width: 60px;
+  //background-color: #e74c3c;
+  background-color: white;
+  display: block;
+  margin: 50px auto 0px auto;
+  border-radius: 100%;
+  box-shadow: 0px 0px 15px 2px #bdc3c7;
+  cursor: default;
+  transition: .3s all ease-in;
+  margin-top: 3px;
+  right: 0;
+}
+
+.text-container {
+  width: 300px;
+  height: 60px;
+  background-color: #b82727; 
+  border-radius: 25px;
+  border-style: solid;
+  border-color: white;
+  margin-left: -50px;
+ 
+  padding-left: 50px;
+  
+}
+
+.text-record{
+  height: 100%;
+  width: 90%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+  color: WHITE;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+  text-overflow: ellipsis;
+}
+
+
+
+.icon-microphone {
+  
+  color: #e74c3c;
+  font-size: 25px;
+  line-height: 60px;
+  display: block;
+  text-align: center;
+  transition: .1s all ease-in;
+  position: relative;
+}
+
+.outer {
+  width: 58px;
+  height: 58px;
+  -webkit-transform: scale(1);
+  border-radius: 100%;
+  position: absolute;
+  background-color: transparent;
+  border: 1px solid white;
+ // z-index: -1;
+  transition: 1.5s all ease;
+  -webkit-animation: woong 1.5s infinite;
+}
+
+.outer-2 {
+  width: 60px;
+  height: 60px;
+  -webkit-transform: scale(1);
+  border-radius: 100%;
+  position: absolute;
+  background-color: white;
+  //z-index: -1;
+  transition: 1.5s all ease;
+  -webkit-animation: woong-2 1.5s infinite;
+  -webkit-animation-delay: 2.5s;
+}
+
+.p-text-center{
+  fa-icon{
+    font-size: 100px;
+  }
+}
+
+
+
+:host ::ng-deep {
+  .p-toast-message-custom {
+      background-color: #302f2f;
+      border: solid #ffffff;
+      border-width: 0 0 0 6px;
+      color: rgb(255, 255, 255);
+  }
+}

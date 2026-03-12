@@ -1,0 +1,30 @@
+<div class="p-grid" style="height:100vh;padding: 30px 0px 20px 0px">
+    <div class="p-col-5 ">
+      <video preload="auto" style="height: 94vh; float:left" #video_pregunta_final>
+        <source src="http://localhost:4568/videos/ELEGIR-ARCHIVOS.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <div class="p-col-7 contenedor-lista">
+      <p-card [style]="{'border-radius':'20px','height':'auto','padding-bottom':'10px'}">
+        <ng-template pTemplate="header">
+          <h1 class="titulo-lista">¿COMO QUIERES CONTINUAR?</h1>
+          <h3 class="detalle-expediente">{{expedienteActual.instanciaActual}}</h3>
+          <h2  class="titulo-expediente">{{expedienteActual.formatoExpediente}}</h2>
+        </ng-template>
+          <div  *ngFor="let eleccionOpcion of listaOpciones; index as i">
+          <p-card   [style]="{'border-radius':'10px', 'margin':'25px'}"  >
+            <div class="contenedor-item"> 
+              <div class="item-contenido" >
+                <p-radioButton [value]="eleccionOpcion" [(ngModel)]="opcionSelected"></p-radioButton>
+                  <img src="{{eleccionOpcion.icono}}">
+                  <label class="opcion-titulo" >{{eleccionOpcion.titulo}}</label>
+              </div>
+              <label class="opcion-subtitulo" >{{eleccionOpcion.grupo_key}}</label>
+            </div>
+          </p-card>
+        </div>
+  
+      </p-card>
+    </div>
+  </div>  
+

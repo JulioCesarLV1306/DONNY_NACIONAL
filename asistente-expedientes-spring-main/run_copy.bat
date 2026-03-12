@@ -1,0 +1,1 @@
+PsExec \\%1 -u %2 -p %3 D:\psanta\dony\copy_files.bat %4 %5

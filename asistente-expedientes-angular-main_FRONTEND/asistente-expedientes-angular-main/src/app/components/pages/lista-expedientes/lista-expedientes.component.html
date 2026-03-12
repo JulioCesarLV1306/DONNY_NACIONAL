@@ -1,0 +1,38 @@
+<div class="p-grid" style="height:100vh;padding: 30px 0px 20px 0px; zoom: 95%">
+  <div class="p-col-5 ">
+    <video preload="auto" style="height: 94vh; float:left" #video_lista_expedientes>
+      <source src="http://localhost:4568/videos/ELEGIR-EXPEDIENTE.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="p-col-7 contenedor-lista">
+    <p-card [style]="{'border-radius':'20px','height':'auto','padding-bottom':'20px'}">
+      <ng-template pTemplate="header">
+        <h1 class="titulo-lista">LISTA DE EXPEDIENTES</h1>
+        <h2  class="titulo-resultados">SE ENCONTRARON {{paginatorTotalRecord}} RESULTADOS</h2>
+      </ng-template>
+
+      <div *ngFor="let expediente of listaExpedientes; index as i" >
+        <p-card [style]="{'border-radius':'10px', 'margin':'15px'}">  
+          <div class="contenedor-expediente">
+            <div class="expediente-item" >
+              <h2 style="margin-top: auto;margin-bottom: auto; color:  #861e26">
+                Fila {{(i+1)}}</h2>
+              <p-radioButton [value]="expediente" [(ngModel)]="selectedExpediente"></p-radioButton>
+            </div>
+            <div class="expediente-contenido" >
+                <label class="expediente-instancia">{{expediente.instanciaActual}}</label>
+                <label class="expediente-formato" >{{expediente.formatoExpediente}}</label>
+                <label class="expediente-sumilla">{{expediente.sumilla}}</label>
+            </div>
+          </div>
+        </p-card>
+        </div>
+
+        <app-paginator [data]="paginatorDataObj"></app-paginator>
+
+    </p-card>
+  </div>
+</div>  
+
+
+<app-volver volverRoute="elegir-especialidad"></app-volver>

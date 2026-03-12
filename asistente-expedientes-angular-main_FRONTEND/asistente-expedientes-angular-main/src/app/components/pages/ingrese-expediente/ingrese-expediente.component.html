@@ -1,0 +1,24 @@
+<div class="contenedor-superior">
+  <div class="contenedor-video">
+    <video style="height: 100%; display: block; margin: auto;  width: auto; "
+     #video_ingrese_expediente>
+      <source *ngIf="objVideo.key == 'numero'" src="http://localhost:4568/videos/INGRESE-NUMERO.mp4" type="video/mp4" />
+      <source *ngIf="objVideo.key == 'anio'" src="http://localhost:4568/videos/INGRESE-ANIO.mp4" type="video/mp4" />
+      <source *ngIf="objVideo.key == 'cuaderno'" src="http://localhost:4568/videos/INGRESE-CUADERNO.mp4" type="video/mp4" />
+    </video>
+
+  </div>
+</div>
+<div class="contenedor-inferior">
+
+  <input *ngIf="keyActual=='numero'" type="text" pInputText value="{{palabraDetectada}}-XXXX-XXX"
+    [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
+    <input *ngIf="keyActual=='anio'" type="text" pInputText value="{{numero}}-{{palabraDetectada}}-XXX"
+    [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
+    <input *ngIf="keyActual=='cuaderno'" type="text" pInputText value="{{numero}}-{{anio}}-{{palabraDetectada}}"
+    [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
+    
+</div>
+<app-volver *ngIf="keyActual=='numero'"></app-volver>
+<app-volver *ngIf="keyActual=='anio'" volverRoute="ingrese-expediente/numero"></app-volver>
+<app-volver *ngIf="keyActual=='cuaderno'" volverRoute="pregunta-cuaderno"></app-volver>

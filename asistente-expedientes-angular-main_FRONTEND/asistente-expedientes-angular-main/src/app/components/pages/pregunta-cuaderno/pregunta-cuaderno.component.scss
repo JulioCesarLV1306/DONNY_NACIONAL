@@ -1,0 +1,39 @@
+.contenedor-superior{
+    height: 70%;
+    padding: 15px;
+    padding-top: 0px;
+}
+
+.contenedor-inferior{
+    height: 30%;
+    display: flex;
+    justify-content: center;
+    align-items:center;
+}
+
+.contenedor-video{
+    height: 100%;  
+    align-content: center;
+}
+
+.eleccion{
+    padding: 15px;
+    display: inline-block;
+    p-radioButton{
+        padding-left: 10px;
+        margin-right: 20px;
+    }
+    label{
+        font-size:40px;
+    }
+}
+
+.eleccion-item{
+    display: flex;
+}
+
+
+
+video{
+    border-radius:0px 0px 25px 25px;
+}
