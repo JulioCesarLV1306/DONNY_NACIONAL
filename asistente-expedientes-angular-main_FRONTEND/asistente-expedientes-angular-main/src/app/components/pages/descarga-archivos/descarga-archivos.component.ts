@@ -37,6 +37,18 @@ export class DescargaArchivosComponent implements OnInit {
 
   codeEstado:number=0;
 
+  private getEstado(response: any): string {
+    return response?.estado ?? response?.xEstado ?? '';
+  }
+
+  private getConteoCopia(response: any): number {
+    return response?.conteoCopia ?? response?.nConteoCopia ?? 0;
+  }
+
+  private getTotalCopia(response: any): number {
+    return response?.totalCopia ?? response?.nTotalCopia ?? 0;
+  }
+
   constructor(private memoriaService: MemoriaService, private downloaderService: DownloaderService,
     private mensajeService: MensajeService, private driveService: DriveService) { }
 
@@ -99,10 +111,11 @@ export class DescargaArchivosComponent implements OnInit {
         if (drive) {
           this.downloaderService.copiar(this.expedienteActual.formatoExpediente,this.expedienteActual.nunico, this.expedienteActual.nincidente, this.listaFechas, this.tamaniosDescarga[i].key, drive.letraUnidad, this.modulo, this.persona).subscribe((copia: any) => {
             if(copia){
-              switch(copia.estado){
+              const estadoCopia = this.getEstado(copia);
+              switch(estadoCopia){
                 case 'copiando':
                   this.mensaje = `COPIANDO CARPETA [1/1]`;
-                  this.estadosDescarga[i] = 'descargando';
+                  this.estadosDescarga[i] = 'copiando';
                   this.bucleComprobarEstadoCopia(i, this.tamaniosDescarga[i].key)
                   break;
                 case 'error-copia':
@@ -189,21 +202,45 @@ export class DescargaArchivosComponent implements OnInit {
       this.downloaderService.consultarCopia(this.expedienteActual.nunico, this.expedienteActual.nincidente, this.modulo.cPcIp, 
         this.persona.dni, keyEleccion, this.listaFechas).subscribe((consultaCopia: any) => {
           if(consultaCopia){
-            switch(consultaCopia.estado){
+            const totalCopia = this.getTotalCopia(consultaCopia);
+            const conteoCopia = this.getConteoCopia(consultaCopia);
+            const estadoCopia = this.getEstado(consultaCopia);
+            const copiaTerminadaPorConteo = totalCopia > 0 && conteoCopia >= totalCopia;
+
+            if (copiaTerminadaPorConteo) {
+              this.estadosDescarga[i] = 'completo-copia';
+              this.cantidadCarpetasCopy=this.cantidadCarpetasCopy+1;
+              this.copiarEleccion(i + 1);
+              return;
+            }
+
+            switch(estadoCopia){
               case 'copiando':
                 this.bucleComprobarEstadoCopia(i, keyEleccion);
                 //this.mensaje = `COPIANDO ${this.listaEleccion[i].titulo} [${consulta.archivosDescargados+1}/${consulta.totalArchivos}]`;
                 break;
+              case 'completo-descarga':
+                this.mensaje = `RECONECTANDO COPIA...`;
+                this.bucleComprobarEstadoCopia(i, keyEleccion);
+                break;
               case 'error-copia':
-                this.estadosDescarga[i] = consultaCopia.estado;
+                this.estadosDescarga[i] = 'error-copia';
                 this.copiarEleccion(i + 1);
                 break;
               case 'completo-copia':
+                this.estadosDescarga[i] = 'completo-copia';
                 this.cantidadCarpetasCopy=this.cantidadCarpetasCopy+1
                 this.copiarEleccion(i + 1);
                 break;
+              default:
+                this.mensaje = `RECONECTANDO COPIA...`;
+                this.bucleComprobarEstadoCopia(i, keyEleccion);
+                break;
             }
           }
+        }, () => {
+          this.mensaje = `RECONECTANDO COPIA...`;
+          this.bucleComprobarEstadoCopia(i, keyEleccion);
         })
     },this.tiempoEsperaConsulta)
   }
