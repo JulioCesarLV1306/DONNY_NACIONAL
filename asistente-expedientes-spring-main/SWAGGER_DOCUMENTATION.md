@@ -41,6 +41,9 @@ http://localhost:8080/v3/api-docs
 |-----|-------------|-----------|
 | **Bitácora** | API para registro de auditoría y seguimiento | `/apiv1/bitacora/*` |
 | **Encuestas** | API para gestión de encuestas de satisfacción | `/apiv1/encuesta/*` |
+| **Usuarios** | API CRUD para gestión de usuarios del sistema | `/apiv1/usuario/*` |
+| **Módulos** | API CRUD para gestión de módulos/PCs | `/apiv1/modulo/*` |
+| **Autenticación** | API para login de usuarios internos (correo + DNI) | `/apiv1/auth/*` |
 | **Expedientes** | API para búsqueda y consulta de expedientes judiciales | `/apiv1/expediente/*` |
 | **Personas** | API para validación y autenticación de usuarios ciudadanos | `/apiv1/persona/*` |
 
@@ -69,6 +72,43 @@ El sistema usa prefijos estándar para identificar tipos de campo:
 ---
 
 ## 🧪 Cómo Probar Endpoints en Swagger UI
+
+### Ejemplo: CRUD de Usuarios
+
+1. **Expandir el grupo "Usuarios"**
+2. Probar en este orden:
+    - `POST /apiv1/usuario/crear`
+    - `GET /apiv1/usuario/listar`
+    - `GET /apiv1/usuario/obtener/{id}`
+    - `PUT /apiv1/usuario/actualizar/{id}`
+    - `DELETE /apiv1/usuario/eliminar/{id}`
+
+### Ejemplo: CRUD de Módulos
+
+1. **Expandir el grupo "Módulos"**
+2. Probar en este orden:
+    - `POST /apiv1/modulo/crear`
+    - `GET /apiv1/modulo/listar`
+    - `GET /apiv1/modulo/obtener/{id}`
+    - `PUT /apiv1/modulo/actualizar/{id}`
+    - `DELETE /apiv1/modulo/eliminar/{id}`
+
+### Ejemplo: Login de Usuario Interno
+
+1. **Expandir el grupo "Autenticación"**
+2. Usar `POST /apiv1/auth/login`
+3. Enviar body JSON:
+
+```json
+{
+    "x_correo": "usuario@example.com",
+    "c_dni": "12345678"
+}
+```
+
+4. Resultado esperado:
+     - `200`: autenticación exitosa (retorna datos de usuario)
+     - `401`: credenciales inválidas o usuario inactivo
 
 ### Ejemplo: Buscar Expedientes
 
