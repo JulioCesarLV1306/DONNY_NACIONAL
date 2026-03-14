@@ -125,6 +125,7 @@ CREATE TABLE public.met_estadistica (
     n_actas            INTEGER NOT NULL,
     n_resoluciones     INTEGER NOT NULL,
     n_documentos       INTEGER NOT NULL,
+    n_videos           INTEGER NOT NULL,
     n_hojas            INTEGER NOT NULL,
     n_bytes            BIGINT,
     n_penal            BIGINT,
