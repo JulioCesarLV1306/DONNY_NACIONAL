@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,28 +32,32 @@ public class Encuesta implements Serializable {
     private static final long serialVersionUID = 746237126088051314L;
     
     @Schema(description = "ID único de la encuesta", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long nIdEncuesta;
     
     @Schema(description = "ID del módulo donde se realizó la encuesta", example = "1", required = true)
-    @JsonAlias({"idModulo", "id_modulo", "n_id_modulo"})
+    @JsonAlias({"nIdModulo", "idModulo", "id_modulo", "n_id_modulo", "nidModulo"})
     private Long nIdModulo;              // FK a seg_modulo
     
     @Schema(description = "ID del usuario que respondió la encuesta", example = "1", required = true)
-    @JsonAlias({"idUsuario", "id_usuario", "n_id_usuario"})
+    @JsonAlias({"nIdUsuario", "idUsuario", "id_usuario", "n_id_usuario", "nidUsuario"})
     private Long nIdUsuario;             // FK a seg_usuario
     
     @Schema(description = "Calificación de 1 a 5", example = "5", required = true, minimum = "1", maximum = "5")
-    @JsonAlias({"calificacion", "n_calificacion"})
+    @JsonAlias({"nCalificacion", "calificacion", "n_calificacion", "ncalificacion"})
     private Integer nCalificacion;
     
     @Schema(description = "Fecha y hora de la encuesta", accessMode = Schema.AccessMode.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Date fFechaHora;
     
     // Campos de auditoría
     @Schema(description = "Fecha de auditoría", accessMode = Schema.AccessMode.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Date fAud;
     
     @Schema(description = "Bandera de auditoría (I/U/D)", accessMode = Schema.AccessMode.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String bAud;
     
     // Campos de compatibilidad (DEPRECATED)

@@ -5,6 +5,7 @@ import com.ncpp.asistenteexpedientes.asistente.entity.Usuario;
 import com.ncpp.asistenteexpedientes.asistente.service.impl.BitacoraServiceImpl;
 import com.ncpp.asistenteexpedientes.asistente.service.impl.UsuarioServiceImpl;
 import com.ncpp.asistenteexpedientes.sece.entity.Persona;
+import com.ncpp.asistenteexpedientes.sece.entity.Tipo;
 import com.ncpp.asistenteexpedientes.sece.service.PersonaService;
 import com.ncpp.asistenteexpedientes.util.Constants;
 import com.ncpp.asistenteexpedientes.util.InternalServerException;
@@ -58,50 +59,77 @@ public class PersonaController {
         @Parameter(description = "IP del módulo", required = true) @RequestParam String ipModulo, 
         @Parameter(description = "Usuario del módulo", required = true) @RequestParam String usuarioModulo){
         Persona persona = new Persona();
+        Usuario usuario = null;
+        UsuarioServiceImpl usuarioService = new UsuarioServiceImpl();
+        Bitacora bitacora = new Bitacora();
+        BitacoraServiceImpl bitacoraService = new BitacoraServiceImpl();
         try {
-            persona=personaService.buscarPorDni(dni);
+            // Validación principal contra nueva BD refactorizada (seg_usuario)
+            usuario = usuarioService.findByDni(dni);
+            if (usuario == null || usuario.getNIdTipo() == null || !"S".equalsIgnoreCase(usuario.getLActivo())) {
+                throw new NotFoundException();
+            }
+
+            // Construir respuesta compatible con frontend actual (Persona + Tipo)
+            persona.setDni(usuario.getCDni());
+            persona.setNombre(usuario.getNombreCompleto());
+            persona.setCorreo(usuario.getXCorreo());
+            persona.setNumero(usuario.getCTelefono());
+            persona.setEstado("S".equalsIgnoreCase(usuario.getLActivo()) ? 1 : 0);
+            persona.setNIdUsuario(usuario.getNIdUsuario());
+
+            Tipo tipo = new Tipo();
+            tipo.setIdTipo(usuario.getNIdTipo());
+            tipo.setNombre(obtenerNombreTipoUsuario(usuario.getNIdTipo()));
+            persona.setTipo(tipo);
+
+            // Campos legacy opcionales: intentar enriquecer desde SECE si existe
+            try {
+                Persona personaSece = personaService.buscarPorDni(dni);
+                if (personaSece != null && personaSece.getIdPersona() > 0) {
+                    persona.setIdPersona(personaSece.getIdPersona());
+                }
+            } catch (Exception ignored) {
+                // No bloquea el login por lectora
+            }
         } catch (Exception e) {
             System.out.println(e);			
             e.printStackTrace();
             LogDony.write(this.getClass().getName()+" - ERROR: "+e);
+            if (e instanceof NotFoundException) {
+                throw (NotFoundException) e;
+            }
             throw new InternalServerException();  
         }
-        Bitacora bitacora = new Bitacora();
-        BitacoraServiceImpl bitacoraService = new BitacoraServiceImpl();
-        UsuarioServiceImpl usuarioService = new UsuarioServiceImpl();
-        
-        if(persona!=null){
-            // Obtener/crear usuario con nuevo esquema
-            Usuario usuario = usuarioService.createIfNotExists(dni, persona.getNombre());
-            
-            // Usar nuevo esquema con nomenclatura refactorizada
-            bitacora.setNIdUsuario(usuario.getNIdUsuario());      // ✅ FK obligatoria
-            bitacora.setCCodigoAccion("LOGIN_PERSONA");           // ✅ c_ = código
-            bitacora.setTDescripcionAccion("LA PERSONA "+persona.getNombre()+" ("+persona.getDni()+") INGRESO AL ASISTENTE CON EXITO");
-            bitacora.setCIpModulo(ipModulo);                      // ✅ c_ = código
-            
-            // Mantener campos deprecated para compatibilidad
-            bitacora.setDniSece(dni);
-            bitacora.setNombreSece(persona.getNombre());
-            
-            bitacoraService.create(bitacora);
-        }else{
-            // Para login fallido, crear usuario temporal si no existe
-            Usuario usuario = usuarioService.createIfNotExists(dni, "USUARIO_DESCONOCIDO");
-            
-            bitacora.setNIdUsuario(usuario.getNIdUsuario());      // ✅ FK obligatoria
-            bitacora.setCCodigoAccion("FAIL_LOGIN_PERSONA");      // ✅ c_ = código
-            bitacora.setTDescripcionAccion("EL DNI "+dni+" INTENTO INGRESAR AL ASISTENTE SIN EXITO");
-            bitacora.setCIpModulo(ipModulo);                      // ✅ c_ = código
-            
-            // Mantener campos deprecated para compatibilidad
-            bitacora.setDniSece(dni);
-            
-            bitacoraService.create(bitacora);
-            throw new NotFoundException();  
-        } 
+
+        bitacora.setNIdUsuario(usuario.getNIdUsuario());
+        bitacora.setCCodigoAccion("LOGIN_PERSONA");
+        bitacora.setTDescripcionAccion("LA PERSONA "+persona.getNombre()+" ("+persona.getDni()+") INGRESO AL ASISTENTE CON EXITO");
+        bitacora.setCIpModulo(ipModulo);
+        bitacora.setDniSece(dni);
+        bitacora.setNombreSece(persona.getNombre());
+        bitacoraService.create(bitacora);
         
         return new ResponseEntity<Persona>(persona,HttpStatus.OK);
+    }
+
+    private String obtenerNombreTipoUsuario(Integer nIdTipo) {
+        if (nIdTipo == null) {
+            return "Sin tipo";
+        }
+        switch (nIdTipo) {
+            case 1: return "Administrador";
+            case 2: return "Fiscal Provincial PE";
+            case 3: return "Fiscal Adjunto Penal";
+            case 4: return "Asistente de Fiscal";
+            case 5: return "Defensor Publico";
+            case 6: return "Procuraduria";
+            case 7: return "Abogados (a)";
+            case 8: return "Parte del Proceso";
+            case 9: return "Invitado";
+            case 10: return "CEM";
+            default: return "Tipo " + nIdTipo;
+        }
     }
 
 

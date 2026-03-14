@@ -148,8 +148,7 @@ public class DownloaderServiceImpl implements DownloaderService {
                                 }
 
                                 descargaService.createOrUpdateDescarga(keyDescarga, DescargaServiceImpl.ESTADO_COMPLETO_DESCARGA, videosDescargados, lVideos.size());
-                                // estadisticasService.aumentarVideos(idModulo, lVideos.size()); 
-                                // NOTA: Campo 'videos' eliminado del nuevo esquema met_estadistica v2.0
+                                estadisticasService.aumentarVideos(idModulo, videosDescargados);
                             } catch (Exception e) {
                                 System.out.println(e);
                                 LogDony.write(this.getClass().getName()+" - ERROR: "+e);

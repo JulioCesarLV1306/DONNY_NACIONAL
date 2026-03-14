@@ -38,6 +38,12 @@ public class EncuestaServiceImpl implements EncuestaService {
             if (encuesta.getNIdModulo() == null) {
                 throw new IllegalArgumentException("n_id_modulo es obligatorio.");
             }
+            if (encuesta.getNCalificacion() == null) {
+                throw new IllegalArgumentException("n_calificacion es obligatorio.");
+            }
+            if (encuesta.getNCalificacion() < 1 || encuesta.getNCalificacion() > 5) {
+                throw new IllegalArgumentException("n_calificacion debe estar entre 1 y 5.");
+            }
             
             // SQL refactorizado con nomenclatura met_encuesta
             String sql = "INSERT INTO met_encuesta(" +
@@ -55,7 +61,13 @@ public class EncuestaServiceImpl implements EncuestaService {
             
             System.out.println("[EncuestaServiceImpl] Encuesta registrada para usuario ID: " + 
                 encuesta.getNIdUsuario() + ", calificación: " + encuesta.getNCalificacion());
-            
+        } catch (IllegalArgumentException e) {
+            try {
+                if (cn != null) cn.rollback();
+            } catch (Exception ex) {
+                System.err.println("[EncuestaServiceImpl] ERROR en rollback: " + ex.getMessage());
+            }
+            throw e;
         } catch (Exception e) {
             System.err.println("[EncuestaServiceImpl] ERROR al crear: " + e.getMessage());
             e.printStackTrace();
@@ -66,6 +78,8 @@ public class EncuestaServiceImpl implements EncuestaService {
             } catch (Exception ex) {
                 System.err.println("[EncuestaServiceImpl] ERROR en rollback: " + ex.getMessage());
             }
+
+            throw new RuntimeException("Error al crear encuesta", e);
         } finally {
             try {
                 if (cn != null) cn.close();

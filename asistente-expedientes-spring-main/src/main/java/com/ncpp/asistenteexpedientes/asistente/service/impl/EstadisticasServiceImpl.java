@@ -3,6 +3,8 @@ package com.ncpp.asistenteexpedientes.asistente.service.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.ncpp.asistenteexpedientes.asistente.database.AccesoAsistente;
 import com.ncpp.asistenteexpedientes.asistente.entity.Estadisticas;
@@ -26,12 +28,143 @@ public class EstadisticasServiceImpl implements EstadisticasService {
     private final String strActas = "n_actas";
     private final String strResoluciones = "n_resoluciones";
     private final String strDocumentos = "n_documentos";
+    private final String strVideos = "n_videos";
     private final String strHojas = "n_hojas";
     private final String strBytes = "n_bytes";
     private final String strPenal = "n_penal";
     private final String strCivil = "n_civil";
     private final String strFamilia = "n_familia";
     private final String strLaboral = "n_laboral";
+
+    @Override
+    public Estadisticas obtenerEstadisticasHoy(long idModulo) {
+        Estadisticas estadisticas = findByDate(idModulo);
+        if (estadisticas == null || estadisticas.getNIdEstadistica() == null ||
+            estadisticas.getNIdEstadistica() == 0) {
+            estadisticas = new Estadisticas();
+            estadisticas.setNIdEstadistica(0L);
+            estadisticas.setNIdModulo(idModulo);
+            estadisticas.setNActas(0);
+            estadisticas.setNResoluciones(0);
+            estadisticas.setNDocumentos(0);
+            estadisticas.setNVideos(0);
+            estadisticas.setNHojas(0);
+            estadisticas.setNBytes(0L);
+            estadisticas.setNPenal(0L);
+            estadisticas.setNLaboral(0L);
+            estadisticas.setNCivil(0L);
+            estadisticas.setNFamilia(0L);
+            estadisticas.setFFecha(getFechaSQL());
+        }
+        return estadisticas;
+    }
+
+    @Override
+    public List<Estadisticas> listarEstadisticasHoy() {
+        Connection cn = null;
+        List<Estadisticas> listado = new ArrayList<>();
+        try {
+            cn = AccesoAsistente.getConnection();
+
+            String sql = "SELECT n_id_estadistica, n_id_modulo, n_actas, n_resoluciones, " +
+                "n_documentos, n_videos, n_hojas, n_bytes, n_penal, n_laboral, n_civil, n_familia, f_fecha " +
+                "FROM met_estadistica WHERE f_fecha = ? ORDER BY n_id_modulo ASC";
+
+            PreparedStatement pstm = cn.prepareStatement(sql);
+            pstm.setDate(1, getFechaSQL());
+            ResultSet rs = pstm.executeQuery();
+
+            while (rs.next()) {
+                Estadisticas estadisticas = new Estadisticas();
+                estadisticas.setNIdEstadistica(rs.getLong("n_id_estadistica"));
+                estadisticas.setNIdModulo(rs.getLong("n_id_modulo"));
+                estadisticas.setNActas(rs.getInt("n_actas"));
+                estadisticas.setNResoluciones(rs.getInt("n_resoluciones"));
+                estadisticas.setNDocumentos(rs.getInt("n_documentos"));
+                estadisticas.setNVideos(rs.getInt("n_videos"));
+                estadisticas.setNHojas(rs.getInt("n_hojas"));
+                estadisticas.setNBytes(rs.getLong("n_bytes"));
+                estadisticas.setNPenal(rs.getLong("n_penal"));
+                estadisticas.setNLaboral(rs.getLong("n_laboral"));
+                estadisticas.setNCivil(rs.getLong("n_civil"));
+                estadisticas.setNFamilia(rs.getLong("n_familia"));
+                estadisticas.setFFecha(rs.getDate("f_fecha"));
+                listado.add(estadisticas);
+            }
+
+            rs.close();
+            pstm.close();
+        } catch (Exception e) {
+            System.err.println("[EstadisticasServiceImpl] ERROR en listarEstadisticasHoy: " +
+                e.getMessage());
+            e.printStackTrace();
+            LogDony.write(this.getClass().getName() + " - ERROR: " + e);
+        } finally {
+            try {
+                if (cn != null) cn.close();
+            } catch (Exception e) {
+                System.err.println("[EstadisticasServiceImpl] ERROR al cerrar: " +
+                    e.getMessage());
+                LogDony.write(this.getClass().getName() + " - ERROR: " + e);
+            }
+        }
+        return listado;
+    }
+
+    @Override
+    public List<Estadisticas> listarEstadisticasPorRango(java.sql.Date fechaInicio,
+        java.sql.Date fechaFin) {
+        Connection cn = null;
+        List<Estadisticas> listado = new ArrayList<>();
+        try {
+            cn = AccesoAsistente.getConnection();
+
+            String sql = "SELECT n_id_estadistica, n_id_modulo, n_actas, n_resoluciones, " +
+                "n_documentos, n_videos, n_hojas, n_bytes, n_penal, n_laboral, n_civil, n_familia, f_fecha " +
+                "FROM met_estadistica WHERE f_fecha BETWEEN ? AND ? " +
+                "ORDER BY f_fecha ASC, n_id_modulo ASC";
+
+            PreparedStatement pstm = cn.prepareStatement(sql);
+            pstm.setDate(1, fechaInicio);
+            pstm.setDate(2, fechaFin);
+            ResultSet rs = pstm.executeQuery();
+
+            while (rs.next()) {
+                Estadisticas estadisticas = new Estadisticas();
+                estadisticas.setNIdEstadistica(rs.getLong("n_id_estadistica"));
+                estadisticas.setNIdModulo(rs.getLong("n_id_modulo"));
+                estadisticas.setNActas(rs.getInt("n_actas"));
+                estadisticas.setNResoluciones(rs.getInt("n_resoluciones"));
+                estadisticas.setNDocumentos(rs.getInt("n_documentos"));
+                estadisticas.setNVideos(rs.getInt("n_videos"));
+                estadisticas.setNHojas(rs.getInt("n_hojas"));
+                estadisticas.setNBytes(rs.getLong("n_bytes"));
+                estadisticas.setNPenal(rs.getLong("n_penal"));
+                estadisticas.setNLaboral(rs.getLong("n_laboral"));
+                estadisticas.setNCivil(rs.getLong("n_civil"));
+                estadisticas.setNFamilia(rs.getLong("n_familia"));
+                estadisticas.setFFecha(rs.getDate("f_fecha"));
+                listado.add(estadisticas);
+            }
+
+            rs.close();
+            pstm.close();
+        } catch (Exception e) {
+            System.err.println("[EstadisticasServiceImpl] ERROR en listarEstadisticasPorRango: " +
+                e.getMessage());
+            e.printStackTrace();
+            LogDony.write(this.getClass().getName() + " - ERROR: " + e);
+        } finally {
+            try {
+                if (cn != null) cn.close();
+            } catch (Exception e) {
+                System.err.println("[EstadisticasServiceImpl] ERROR al cerrar: " +
+                    e.getMessage());
+                LogDony.write(this.getClass().getName() + " - ERROR: " + e);
+            }
+        }
+        return listado;
+    }
 
     @Override
     public void aumentarActas(long idModulo, int cantidad) {
@@ -50,9 +183,7 @@ public class EstadisticasServiceImpl implements EstadisticasService {
 
     @Override
     public void aumentarVideos(long idModulo, int cantidad) {
-        // DEPRECATED: El campo videos no existe en el nuevo esquema
-        System.out.println("[EstadisticasServiceImpl] ADVERTENCIA: aumentarVideos() " +
-            "es deprecated - campo eliminado en esquema V2.0");
+        aumentarCampo(strVideos, idModulo, cantidad);
     }
 
     @Override
@@ -112,6 +243,9 @@ public class EstadisticasServiceImpl implements EstadisticasService {
                         break;
                     case "n_documentos":
                         pstm.setLong(1, estadisticas.getNDocumentos() + cantidad);
+                        break;
+                    case "n_videos":
+                        pstm.setLong(1, estadisticas.getNVideos() + cantidad);
                         break;
                     case "n_hojas":
                         pstm.setLong(1, estadisticas.getNHojas() + cantidad);
@@ -186,7 +320,7 @@ public class EstadisticasServiceImpl implements EstadisticasService {
             
             // SQL refactorizado con nomenclatura met_estadistica
             String sql = "SELECT n_id_estadistica, n_actas, n_resoluciones, n_documentos, " +
-                "n_hojas, n_bytes, n_penal, n_laboral, n_familia, n_civil " +
+                "n_videos, n_hojas, n_bytes, n_penal, n_laboral, n_familia, n_civil " +
                 "FROM met_estadistica WHERE n_id_modulo = ? AND f_fecha = ?";
             
             PreparedStatement pstm = cn.prepareStatement(sql);
@@ -199,6 +333,7 @@ public class EstadisticasServiceImpl implements EstadisticasService {
                 estadisticas.setNActas(rs.getInt("n_actas"));
                 estadisticas.setNResoluciones(rs.getInt("n_resoluciones"));
                 estadisticas.setNDocumentos(rs.getInt("n_documentos"));
+                estadisticas.setNVideos(rs.getInt("n_videos"));
                 estadisticas.setNHojas(rs.getInt("n_hojas"));
                 estadisticas.setNBytes(rs.getLong("n_bytes"));
                 estadisticas.setNPenal(rs.getLong("n_penal"));
@@ -235,6 +370,7 @@ public class EstadisticasServiceImpl implements EstadisticasService {
         estadisticas.setNActas(0);
         estadisticas.setNDocumentos(0);
         estadisticas.setNResoluciones(0);
+        estadisticas.setNVideos(0);
         estadisticas.setNHojas(0);
         estadisticas.setNBytes(0L);
         estadisticas.setNPenal(0L);
@@ -250,22 +386,23 @@ public class EstadisticasServiceImpl implements EstadisticasService {
             
             // SQL refactorizado con nomenclatura met_estadistica
             String sql = "INSERT INTO met_estadistica(" +
-                "n_id_modulo, n_actas, n_resoluciones, n_documentos, n_hojas, f_fecha, " +
+                "n_id_modulo, n_actas, n_resoluciones, n_documentos, n_videos, n_hojas, f_fecha, " +
                 "n_bytes, n_penal, n_laboral, n_civil, n_familia" +
-                ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                ") VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
             PreparedStatement pstm = cn.prepareStatement(sql);
             pstm.setLong(1, estadisticas.getNIdModulo());
             pstm.setInt(2, estadisticas.getNActas());
             pstm.setInt(3, estadisticas.getNResoluciones());
             pstm.setInt(4, estadisticas.getNDocumentos());
-            pstm.setInt(5, estadisticas.getNHojas());
-            pstm.setDate(6, (java.sql.Date) estadisticas.getFFecha());
-            pstm.setLong(7, estadisticas.getNBytes());
-            pstm.setLong(8, estadisticas.getNPenal());
-            pstm.setLong(9, estadisticas.getNLaboral());
-            pstm.setLong(10, estadisticas.getNCivil());
-            pstm.setLong(11, estadisticas.getNFamilia());
+            pstm.setInt(5, estadisticas.getNVideos());
+            pstm.setInt(6, estadisticas.getNHojas());
+            pstm.setDate(7, (java.sql.Date) estadisticas.getFFecha());
+            pstm.setLong(8, estadisticas.getNBytes());
+            pstm.setLong(9, estadisticas.getNPenal());
+            pstm.setLong(10, estadisticas.getNLaboral());
+            pstm.setLong(11, estadisticas.getNCivil());
+            pstm.setLong(12, estadisticas.getNFamilia());
 
             pstm.executeUpdate();
             

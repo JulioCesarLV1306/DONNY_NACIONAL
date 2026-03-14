@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Data;
 
 @Entity
@@ -39,6 +40,10 @@ public class Persona implements Serializable{
     @ManyToOne
     @JoinColumn(name = "id_tipo")
     private Tipo tipo;
+
+    // Campo solo para respuesta (no mapea a tabla Persona)
+    @Transient
+    private Long nIdUsuario;
 
 }
 
