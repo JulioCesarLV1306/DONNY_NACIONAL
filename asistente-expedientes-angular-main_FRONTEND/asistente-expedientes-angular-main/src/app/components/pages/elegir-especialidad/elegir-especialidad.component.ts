@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EleccionModel } from 'src/app/dto/eleccion-model';
@@ -33,6 +33,8 @@ export class ElegirEspecialidadComponent implements OnInit, OnDestroy, AfterView
   cuaderno:any='X';
 
   idTipo:number=0;
+
+  private isNavigating = false;
   
   @ViewChild('video_elegir_archivos') myVideo!: ElementRef;
 
@@ -90,7 +92,16 @@ export class ElegirEspecialidadComponent implements OnInit, OnDestroy, AfterView
 
   seleccionarEspecialidad(valor: string){
     const index:number = this.getIndexEleccion(valor);
+    this.seleccionarEspecialidadPorIndice(index);
+  }
+
+  seleccionarEspecialidadPorIndice(index: number) {
+    if (this.isNavigating) {
+      return;
+    }
+
     if (index > 0 && index <= this.listaEleccion.length) {
+      this.isNavigating = true;
       this.especialidadSelected = this.listaEleccion[index-1];
       this.memoriaService.setEspecialidad(this.especialidadSelected.key);
       setTimeout(() => {
@@ -99,6 +110,15 @@ export class ElegirEspecialidadComponent implements OnInit, OnDestroy, AfterView
         });
       }, this.tiempoEspera);
      
+    }
+  }
+
+  @HostListener('window:keydown.enter', ['$event'])
+  confirmarSeleccionConEnter(event: KeyboardEvent) {
+    event.preventDefault();
+    const index = this.listaEleccion.findIndex(eleccion => eleccion === this.especialidadSelected);
+    if (index >= 0) {
+      this.seleccionarEspecialidadPorIndice(index + 1);
     }
   }
   

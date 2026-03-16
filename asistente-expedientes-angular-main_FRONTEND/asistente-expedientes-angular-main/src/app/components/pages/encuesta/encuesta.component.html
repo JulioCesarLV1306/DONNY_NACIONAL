@@ -10,7 +10,7 @@
   
     <div class="contenedor-item">
         <div style="width:100%" *ngFor="let satisfaccion of listaSatisfaccion; index as i">
-            <div class="item-contenido ">
+            <div class="item-contenido " [class.selected-item]="satisfaccionSelected?.key === satisfaccion.key" (click)="seleccionarSatisfaccionPorIndice(i)" tabindex="0" role="button" (keyup.enter)="seleccionarSatisfaccionPorIndice(i)">
                 <img src="{{satisfaccion.icono}}">
                 <label class="titulo-encuesta">{{satisfaccion.titulo}}</label>
             </div>

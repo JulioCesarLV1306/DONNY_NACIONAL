@@ -12,12 +12,12 @@
       </ng-template>
 
       <div *ngFor="let expediente of listaExpedientes; index as i" >
-        <p-card [style]="{'border-radius':'10px', 'margin':'15px'}">  
+        <p-card [style]="{'border-radius':'10px', 'margin':'15px'}" (click)="seleccionarDesdeMouse(i + 1)">  
           <div class="contenedor-expediente">
             <div class="expediente-item" >
               <h2 style="margin-top: auto;margin-bottom: auto; color:  #861e26">
                 Fila {{(i+1)}}</h2>
-              <p-radioButton [value]="expediente" [(ngModel)]="selectedExpediente"></p-radioButton>
+              <p-radioButton [value]="expediente" [(ngModel)]="selectedExpediente" (onClick)="seleccionarDesdeMouse(i + 1)"></p-radioButton>
             </div>
             <div class="expediente-contenido" >
                 <label class="expediente-instancia">{{expediente.instanciaActual}}</label>

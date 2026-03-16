@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EleccionModel } from 'src/app/dto/eleccion-model';
 import { WordModel } from 'src/app/dto/word-model';
@@ -20,8 +20,10 @@ export class EncuestaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   
   listaSatisfaccion: EleccionModel[] = [];
+  satisfaccionSelected?: EleccionModel;
   timeoutReload:any;
   timeoutRecord:any;
+  private isSending = false;
   
   subscription: Subscription;
 
@@ -57,6 +59,11 @@ export class EncuestaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   enviarEncuesta(valor:any){
+    if (this.isSending) {
+      return;
+    }
+    this.isSending = true;
+
     let modulo=this.memoriaService.getModulo();
     let persona=this.memoriaService.getPersona();
     const nIdModulo = (modulo as any)?.nIdModulo ?? (modulo as any)?.idModulo;
@@ -64,11 +71,13 @@ export class EncuestaComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!nIdModulo) {
       console.error('No se encontró nIdModulo/idModulo en memoria para registrar encuesta', modulo);
+      this.isSending = false;
       this.mensajeService.goToDespedidaFinal();
       return;
     }
     if (!nIdUsuario) {
       console.error('No se encontró nIdUsuario en memoria para registrar encuesta', persona);
+      this.isSending = false;
       this.mensajeService.goToDespedidaFinal();
       return;
     }
@@ -86,6 +95,20 @@ export class EncuestaComponent implements OnInit, AfterViewInit, OnDestroy {
     },er=>{
       this.mensajeService.goToDespedidaFinal();
     })
+  }
+
+  seleccionarSatisfaccionPorIndice(index: number) {
+    if (index >= 0 && index < this.listaSatisfaccion.length) {
+      this.satisfaccionSelected = this.listaSatisfaccion[index];
+    }
+  }
+
+  @HostListener('window:keydown.enter', ['$event'])
+  confirmarEncuestaConEnter(event: KeyboardEvent) {
+    event.preventDefault();
+    if (this.satisfaccionSelected) {
+      this.enviarEncuesta(Number(this.satisfaccionSelected.key));
+    }
   }
 
  

@@ -11,10 +11,10 @@
           <h2  class="titulo-expediente">{{numero}}-{{anio}}-{{cuaderno}}</h2>
         </ng-template>
           <div  *ngFor="let eleccionEspecialidad of listaEleccion; index as i">
-          <p-card   [style]="{'border-radius':'10px', 'margin':'25px'}"  >
+          <p-card   [style]="{'border-radius':'10px', 'margin':'25px'}" (click)="seleccionarEspecialidadPorIndice(i + 1)" tabindex="0" role="button" (keyup.enter)="seleccionarEspecialidadPorIndice(i + 1)">
             <div class="contenedor-item"> 
               <div class="item-contenido" >
-                <p-radioButton [value]="eleccionEspecialidad" [(ngModel)]="especialidadSelected"></p-radioButton>
+                <p-radioButton [value]="eleccionEspecialidad" [(ngModel)]="especialidadSelected" (click)="$event.stopPropagation(); seleccionarEspecialidadPorIndice(i + 1)" (onClick)="seleccionarEspecialidadPorIndice(i + 1)"></p-radioButton>
                   <img src="{{eleccionEspecialidad.icono}}">
                   <label class="especialidad-titulo" >{{eleccionEspecialidad.titulo}}</label>
               </div>

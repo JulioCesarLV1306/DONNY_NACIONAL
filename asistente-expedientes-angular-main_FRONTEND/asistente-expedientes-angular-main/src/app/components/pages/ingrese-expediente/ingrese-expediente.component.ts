@@ -34,6 +34,8 @@ export class IngreseExpedienteComponent implements OnInit, OnDestroy, AfterViewI
   cuaderno:any;
   anio:any;
 
+  private readonly segmentoFormatoLength = 4;
+
 
 
   @ViewChild('video_ingrese_expediente') myVideo!: ElementRef;
@@ -57,13 +59,13 @@ export class IngreseExpedienteComponent implements OnInit, OnDestroy, AfterViewI
       this.keyActual=routeParams.key;
       switch (routeParams.key) {
         case 'numero':
-          this.palabraDetectada='XXXXX'
+          this.palabraDetectada=''
           break;
         case 'anio':
-          this.palabraDetectada='XXXX'
+          this.palabraDetectada=''
           break;
         case 'cuaderno':
-          this.palabraDetectada='XXX'
+          this.palabraDetectada=''
           break;
       }
     });
@@ -78,10 +80,11 @@ export class IngreseExpedienteComponent implements OnInit, OnDestroy, AfterViewI
 
 
   seleccionarValor(valor: any) {
+    const valorNormalizado = this.normalizarValor(valor);
     this.videosService.stopVideo(this.myVideo);
-    this.palabraDetectada = valor;
-    if (this.validarNumero(this.palabraDetectada)) {
-      this.setVariableMemoria(this.palabraDetectada);
+    this.palabraDetectada = valorNormalizado;
+    if (valorNormalizado !== null && this.validarNumero(valorNormalizado)) {
+      this.setVariableMemoria(valorNormalizado);
       setTimeout(() => {
         this.router.navigate([this.objVideo.routerTo]);
       }, this.tiempoEspera);
@@ -89,6 +92,40 @@ export class IngreseExpedienteComponent implements OnInit, OnDestroy, AfterViewI
       this.mensajeService.goToValorIncorrecto(valor, `ingrese-expediente/${this.objVideo.key}`);
     }
 
+  }
+
+  confirmarIngresoManual() {
+    this.seleccionarValor(this.palabraDetectada);
+  }
+
+  onInputManual(valor: any) {
+    this.palabraDetectada = this.sanitizarNumerico(valor);
+  }
+
+  get expedienteBusquedaPreview(): string {
+    const numeroPreview = this.keyActual === 'numero' ? this.palabraDetectada : this.numero;
+    const anioPreview = this.keyActual === 'anio' ? this.palabraDetectada : this.anio;
+    const cuadernoPreview = this.keyActual === 'cuaderno' ? this.palabraDetectada : this.cuaderno;
+
+    return `${this.formatearSegmento(numeroPreview)}-${this.formatearSegmento(anioPreview)}-${this.formatearSegmento(cuadernoPreview)}`;
+  }
+
+  private normalizarValor(valor: any): number | null {
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : null;
+  }
+
+  private sanitizarNumerico(valor: any): string {
+    return String(valor ?? '').replace(/\D/g, '');
+  }
+
+  private formatearSegmento(valor: any): string {
+    const soloNumeros = this.sanitizarNumerico(valor);
+    if (!soloNumeros) {
+      return 'XXXX';
+    }
+
+    return soloNumeros.slice(0, this.segmentoFormatoLength).padEnd(this.segmentoFormatoLength, 'X');
   }
 
   actualizarHTML() {

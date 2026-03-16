@@ -32,32 +32,39 @@ public class Encuesta implements Serializable {
     private static final long serialVersionUID = 746237126088051314L;
     
     @Schema(description = "ID único de la encuesta", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "nIdEncuesta", access = JsonProperty.Access.READ_ONLY)
+    @JsonAlias({"nidEncuesta", "n_id_encuesta", "idEncuesta", "id_encuesta"})
     private Long nIdEncuesta;
     
     @Schema(description = "ID del módulo donde se realizó la encuesta", example = "1", required = true)
-    @JsonAlias({"nIdModulo", "idModulo", "id_modulo", "n_id_modulo", "nidModulo"})
+    @JsonProperty("nIdModulo")
+    @JsonAlias({"nidModulo", "idModulo", "id_modulo", "n_id_modulo"})
     private Long nIdModulo;              // FK a seg_modulo
     
     @Schema(description = "ID del usuario que respondió la encuesta", example = "1", required = true)
-    @JsonAlias({"nIdUsuario", "idUsuario", "id_usuario", "n_id_usuario", "nidUsuario"})
+    @JsonProperty("nIdUsuario")
+    @JsonAlias({"nidUsuario", "idUsuario", "id_usuario", "n_id_usuario"})
     private Long nIdUsuario;             // FK a seg_usuario
     
     @Schema(description = "Calificación de 1 a 5", example = "5", required = true, minimum = "1", maximum = "5")
-    @JsonAlias({"nCalificacion", "calificacion", "n_calificacion", "ncalificacion"})
+    @JsonProperty("nCalificacion")
+    @JsonAlias({"calificacion", "n_calificacion", "ncalificacion"})
     private Integer nCalificacion;
     
     @Schema(description = "Fecha y hora de la encuesta", accessMode = Schema.AccessMode.READ_ONLY)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "fFechaHora", access = JsonProperty.Access.READ_ONLY)
+    @JsonAlias({"ffechaHora", "f_fecha_hora"})
     private Date fFechaHora;
     
     // Campos de auditoría
     @Schema(description = "Fecha de auditoría", accessMode = Schema.AccessMode.READ_ONLY)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "fAud", access = JsonProperty.Access.READ_ONLY)
+    @JsonAlias({"faud", "f_aud"})
     private Date fAud;
     
     @Schema(description = "Bandera de auditoría (I/U/D)", accessMode = Schema.AccessMode.READ_ONLY)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "bAud", access = JsonProperty.Access.READ_ONLY)
+    @JsonAlias({"baud", "b_aud"})
     private String bAud;
     
     // Campos de compatibilidad (DEPRECATED)

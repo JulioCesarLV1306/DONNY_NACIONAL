@@ -2,9 +2,9 @@
     
     <div class="pagination p11">
       <ul>
-        <a [class.inac]="data.first"><li>LISTA ANTERIOR</li></a>
-        <a>{{data.number+1}}/{{data.totalPages}}</a>
-        <a [class.inac]="data.last"><li>LISTA SIGUIENTE</li></a>
+        <a [class.inac]="data.first" tabindex="0" role="button" (click)="clickAtras()" (keydown.enter)="clickAtras()" (keydown.space)="clickAtras()"><li>LISTA ANTERIOR</li></a>
+        <a>{{(data.number || 0) + 1}}/{{data.totalPages}}</a>
+        <a [class.inac]="data.last" tabindex="0" role="button" (click)="clickSiguiente()" (keydown.enter)="clickSiguiente()" (keydown.space)="clickSiguiente()"><li>LISTA SIGUIENTE</li></a>
       </ul>
     </div>
   </div>

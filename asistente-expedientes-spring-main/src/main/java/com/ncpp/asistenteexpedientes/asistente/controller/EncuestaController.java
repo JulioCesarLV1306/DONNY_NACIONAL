@@ -69,10 +69,10 @@ public class EncuestaController {
     public ResponseEntity<Map<String, Object>> crear(
         @Parameter(description = "Datos de la encuesta", required = true, schema = @Schema(implementation = Encuesta.class))
         @RequestBody Encuesta encuesta, 
-        @Parameter(description = "IP del módulo donde se realizó la encuesta", required = true)
-        @RequestParam String ipModulo, 
-        @Parameter(description = "Usuario del módulo", required = true)
-        @RequestParam String usuarioModulo){
+        @Parameter(description = "IP del módulo donde se realizó la encuesta", required = false)
+        @RequestParam(required = false) String ipModulo, 
+        @Parameter(description = "Usuario del módulo", required = false)
+        @RequestParam(required = false) String usuarioModulo){
         try {
             Usuario usuarioEncuesta = null;
 

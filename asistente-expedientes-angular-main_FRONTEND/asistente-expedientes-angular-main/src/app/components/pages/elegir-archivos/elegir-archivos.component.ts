@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { faLongArrowAltRight } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
@@ -34,6 +34,8 @@ export class ElegirArchivosComponent implements OnInit, OnDestroy, AfterViewInit
   faArrow = faLongArrowAltRight;
 
   tiempoEspera = 500;
+
+  private isNavigating = false;
 
 
   @ViewChild('video_elegir_archivos') myVideo!: ElementRef;
@@ -127,14 +129,32 @@ export class ElegirArchivosComponent implements OnInit, OnDestroy, AfterViewInit
 
   seleccionarEleccion(valor: string) {
     const index:number = this.getIndexEleccion(valor);
+    this.seleccionarEleccionPorIndice(index);
+  }
+
+  seleccionarEleccionPorIndice(index: number) {
+    if (this.isNavigating) {
+      return;
+    }
+
     if (index > 0 && index <= this.listaEleccion.length && this.listaEleccion[index-1].active) {
       this.opcionSelected = this.listaEleccion[index - 1];
+      this.isNavigating = true;
       setTimeout(() => {
         this.avanzarPagina();
       }, this.tiempoEspera);
       
       //this.listaEleccion[index-1].checked = !this.listaEleccion[index-1].checked
       //this.updateDisabled(index-1);
+    }
+  }
+
+  @HostListener('window:keydown.enter', ['$event'])
+  confirmarSeleccionConEnter(event: KeyboardEvent) {
+    event.preventDefault();
+    const index = this.listaEleccion.findIndex(eleccion => eleccion === this.opcionSelected);
+    if (index >= 0) {
+      this.seleccionarEleccionPorIndice(index + 1);
     }
   }
 

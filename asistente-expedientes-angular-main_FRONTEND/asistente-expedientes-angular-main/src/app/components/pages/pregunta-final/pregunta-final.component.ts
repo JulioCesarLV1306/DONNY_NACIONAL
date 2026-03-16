@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EleccionModel } from 'src/app/dto/eleccion-model';
@@ -31,6 +31,8 @@ export class PreguntaFinalComponent implements OnInit, AfterViewInit, OnDestroy 
   timeoutRecord: any;
 
   tiempoEspera = 500;
+
+  private isNavigating = false;
 
 
   @ViewChild('video_pregunta_final') myVideo!: ElementRef;
@@ -78,9 +80,14 @@ export class PreguntaFinalComponent implements OnInit, AfterViewInit, OnDestroy 
 
 
   seleccionarPreguntaFinal(valor: string) {
+    if (this.isNavigating) {
+      return;
+    }
+
     const index: number = this.getIndexEleccion(valor);
     if (index > 0 && index <= this.listaOpciones.length) {
       this.opcionSelected = this.listaOpciones[index - 1];
+      this.isNavigating = true;
 
       const persona: Persona = this.memoriaService.getPersona();
       const modulo: Modulo = this.memoriaService.getModulo();
@@ -139,6 +146,20 @@ export class PreguntaFinalComponent implements OnInit, AfterViewInit, OnDestroy 
           break;
       }
       //this.memoriaService.setEspecialidad(this.opcionSelected.key);
+    }
+  }
+
+  seleccionarPreguntaFinalPorIndice(index: number) {
+    if (index >= 0 && index < this.listaOpciones.length) {
+      this.seleccionarPreguntaFinal(this.listaOpciones[index].titulo.toLowerCase());
+    }
+  }
+
+  @HostListener('window:keydown.enter', ['$event'])
+  confirmarConEnter(event: KeyboardEvent) {
+    event.preventDefault();
+    if (this.opcionSelected) {
+      this.seleccionarPreguntaFinal(this.opcionSelected.titulo.toLowerCase());
     }
   }
 

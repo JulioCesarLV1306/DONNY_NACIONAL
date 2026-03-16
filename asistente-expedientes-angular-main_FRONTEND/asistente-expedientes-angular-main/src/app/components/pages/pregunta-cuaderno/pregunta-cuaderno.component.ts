@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AnnyangService, inicioCommand, si_noCommand, volverCommand } from 'src/app/services/annyang.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -20,6 +20,8 @@ export class PreguntaCuadernoComponent implements OnInit, OnDestroy, AfterViewIn
 
   timeoutReload:any;
   timeoutRecord:any;
+
+  private isNavigating = false;
 
   numero:any;
   anio:any;
@@ -67,14 +69,19 @@ export class PreguntaCuadernoComponent implements OnInit, OnDestroy, AfterViewIn
     }, 500);
   }
 
-  eventEleccion(){
-    console.log(this.goToCuaderno)
+  eventEleccion(valor: number){
+    this.seleccionarRespuesta(valor);
   }
 
 
 
   seleccionarRespuesta(valor: number){
+    if (this.isNavigating) {
+      return;
+    }
+
     this.goToCuaderno = valor;
+    this.isNavigating = true;
     setTimeout(() => {
       if(this.goToCuaderno == 1) {
         this.router.navigate(['ingrese-expediente/cuaderno']);
@@ -83,6 +90,14 @@ export class PreguntaCuadernoComponent implements OnInit, OnDestroy, AfterViewIn
       }
       
     }, this.tiempoEspera);
+   }
+
+   @HostListener('window:keydown.enter', ['$event'])
+   confirmarSeleccionConEnter(event: KeyboardEvent) {
+    event.preventDefault();
+    if (this.goToCuaderno === 0 || this.goToCuaderno === 1) {
+      this.seleccionarRespuesta(this.goToCuaderno);
+    }
    }
 
    ngOnDestroy() {

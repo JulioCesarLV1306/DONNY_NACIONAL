@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { faLongArrowAltRight } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
@@ -204,6 +204,14 @@ export class RangoDescargaComponent implements OnInit, OnDestroy, AfterViewInit 
     }
   }
 
+  seleccionarFechaMouse(index: number) {
+    this.seleccionarFecha(index + 1);
+  }
+
+  guardarSeleccionPagina() {
+    this.memoriaService.guardarRangoFechasPagina(this.numberCurrentPage, this.getListaFechasPagina());
+  }
+
   seleccionarRangoFechas(index1:number, index2:number){
     if(index1 > 0 && index1 <= this.listaFechas.length && index2 > 0 && index2 <= this.listaFechas.length){
       for (let i = index1-1; i < index2; i++) {
@@ -246,6 +254,12 @@ export class RangoDescargaComponent implements OnInit, OnDestroy, AfterViewInit 
       this.mensajeService.goToNoSeleccion('ITEM','rango-descarga/0');
     }
     
+  }
+
+  @HostListener('window:keydown.enter', ['$event'])
+  confirmarConEnter(event: KeyboardEvent) {
+    event.preventDefault();
+    this.irAInserteUSB();
   }
 
 

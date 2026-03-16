@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WordModel } from 'src/app/dto/word-model';
@@ -14,6 +14,7 @@ export class PaginatorComponent implements OnInit, OnDestroy {
 
 
   subscription: Subscription
+  private isNavigating = false;
 
   @Input()
   data: any;
@@ -50,19 +51,29 @@ export class PaginatorComponent implements OnInit, OnDestroy {
   }
 
   clickSiguiente() {
+    if (!this.data || this.isNavigating) {
+      return;
+    }
 
-    console.log(this.data)
+    const currentPage = Number(this.data.number ?? 0);
     if (!this.data.last) {
+      this.isNavigating = true;
       console.log('SIGUIENTE')
-      this.router.navigate([`${this.data.routerTo}/${(this.data.number + 1)}`]).then(() => {
+      this.router.navigate([`${this.data.routerTo}/${(currentPage + 1)}`]).then(() => {
         window.location.reload();
       });
     }
   }
 
   clickAtras() {
+    if (!this.data || this.isNavigating) {
+      return;
+    }
+
+    const currentPage = Number(this.data.number ?? 0);
     if (!this.data.first) {
-      this.router.navigate([`${this.data.routerTo}/${(this.data.number - 1)}`]).then(() => {
+      this.isNavigating = true;
+      this.router.navigate([`${this.data.routerTo}/${(currentPage - 1)}`]).then(() => {
         window.location.reload();
       });
     }
@@ -70,12 +81,30 @@ export class PaginatorComponent implements OnInit, OnDestroy {
 
 
   clickSalto(salto: number) {
-    salto=salto-10
-    if(salto>0 && salto <=this.data.totalPages){
+    if (!this.data || this.isNavigating) {
+      return;
+    }
+
+    salto = Number(salto) - 10;
+    const totalPages = Number(this.data.totalPages ?? 0);
+    if(salto>0 && salto <= totalPages){
+      this.isNavigating = true;
       this.router.navigate([`${this.data.routerTo}/${(salto - 1)}`]).then(() => {
         window.location.reload();
       });
     }
+  }
+
+  @HostListener('window:keydown.arrowleft', ['$event'])
+  onArrowLeft(event: KeyboardEvent) {
+    event.preventDefault();
+    this.clickAtras();
+  }
+
+  @HostListener('window:keydown.arrowright', ['$event'])
+  onArrowRight(event: KeyboardEvent) {
+    event.preventDefault();
+    this.clickSiguiente();
   }
 
   ngOnDestroy(): void {

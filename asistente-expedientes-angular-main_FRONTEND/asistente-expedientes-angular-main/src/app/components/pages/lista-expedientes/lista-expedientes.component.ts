@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WordModel } from 'src/app/dto/word-model';
@@ -39,6 +39,8 @@ export class ListaExpedientesComponent implements OnInit, OnDestroy, AfterViewIn
 
   timeoutReload: any;
   timeoutRecord: any;
+
+  private isNavigating = false;
 
   @ViewChild('video_lista_expedientes') myVideo!: ElementRef;
 
@@ -138,7 +140,12 @@ export class ListaExpedientesComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   seleccionarExpediente(index: number) {
+    if (this.isNavigating) {
+      return;
+    }
+
     if (index > 0 && index <= this.listaExpedientes.length) {
+      this.isNavigating = true;
       this.selectedExpediente = this.listaExpedientes[index - 1];
       this.memoriaService.guardarExpediente(this.selectedExpediente);
       setTimeout(() => {
@@ -146,6 +153,19 @@ export class ListaExpedientesComponent implements OnInit, OnDestroy, AfterViewIn
           window.location.reload();
         });
       }, this.tiempoEspera);
+    }
+  }
+
+  seleccionarDesdeMouse(index: number) {
+    this.seleccionarExpediente(index);
+  }
+
+  @HostListener('window:keydown.enter', ['$event'])
+  confirmarSeleccionConEnter(event: KeyboardEvent) {
+    event.preventDefault();
+    const index = this.listaExpedientes.findIndex(expediente => expediente === this.selectedExpediente);
+    if (index >= 0) {
+      this.seleccionarExpediente(index + 1);
     }
   }
 

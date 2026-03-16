@@ -12,10 +12,10 @@
           <h2  class="titulo-expediente">{{expedienteActual.formatoExpediente}}</h2>
         </ng-template>
           <div  *ngFor="let eleccionOpcion of listaOpciones; index as i">
-          <p-card   [style]="{'border-radius':'10px', 'margin':'25px'}"  >
+          <p-card   [style]="{'border-radius':'10px', 'margin':'25px'}" (click)="seleccionarPreguntaFinalPorIndice(i)" tabindex="0" role="button" (keyup.enter)="seleccionarPreguntaFinalPorIndice(i)">
             <div class="contenedor-item"> 
               <div class="item-contenido" >
-                <p-radioButton [value]="eleccionOpcion" [(ngModel)]="opcionSelected"></p-radioButton>
+                <p-radioButton [value]="eleccionOpcion" [(ngModel)]="opcionSelected" (click)="$event.stopPropagation()" (onClick)="seleccionarPreguntaFinalPorIndice(i)"></p-radioButton>
                   <img src="{{eleccionOpcion.icono}}">
                   <label class="opcion-titulo" >{{eleccionOpcion.titulo}}</label>
               </div>

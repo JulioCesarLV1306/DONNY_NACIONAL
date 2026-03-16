@@ -14,12 +14,12 @@
         </ng-template>
   
         <div *ngFor="let fecha of listaFechas; index as i" >
-          <p-card [style]="{'border-radius':'10px', 'margin':'15px'}">  
+          <p-card [style]="{'border-radius':'10px', 'margin':'15px'}" (click)="seleccionarFechaMouse(i)">  
             <div class="contenedor-fecha">
               <div class="fecha-item" >
                 <h2 style="margin-top: auto;margin-bottom: auto; color:  #861e26">
                   Fila {{(i+1)}}</h2> 
-                  <p-checkbox [(ngModel)]="checkedListaFechas[i]" [binary]="true"></p-checkbox>
+                  <p-checkbox [(ngModel)]="checkedListaFechas[i]" [binary]="true" (click)="$event.stopPropagation()" (onChange)="guardarSeleccionPagina()"></p-checkbox>
               </div>
               <div class="fecha-contenido" >
                   <label class="fecha-date" >{{fecha.fecha | date:'longDate' }}</label>
@@ -35,7 +35,7 @@
       </p-card>
       <div class="wrapper">
         <div class="item">
-          <div class="contenedor-next">
+          <div class="contenedor-next" (click)="irAInserteUSB()" tabindex="0" role="button" (keyup.enter)="irAInserteUSB()">
             <h2 style="float:left; margin-top: 0; margin-bottom: 0; margin-right: 2px;">DESCARGAR</h2>
             <fa-icon class ="arrow1" [icon]="faArrow" aria-hidden="true" size="2x"></fa-icon>
         </div>

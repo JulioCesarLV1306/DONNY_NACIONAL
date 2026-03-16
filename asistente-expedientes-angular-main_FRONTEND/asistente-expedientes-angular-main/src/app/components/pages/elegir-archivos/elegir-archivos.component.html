@@ -15,11 +15,11 @@
 
         </ng-template>
           <div  *ngFor="let eleccion of listaEleccion; index as i">
-          <p-card  [style]="{'border-radius':'10px', 'margin':'25px'}"  >
+          <p-card  [style]="{'border-radius':'10px', 'margin':'25px'}" (click)="seleccionarEleccionPorIndice(i + 1)" >
             <div class="contenedor-item"> 
               <div class="item-contenido" >
                 <!--p-checkbox [(ngModel)]="eleccion.checked" [binary]="true"></p-checkbox-->
-                <p-radioButton [value]="eleccion" [(ngModel)]="opcionSelected"></p-radioButton>
+                <p-radioButton [value]="eleccion" [(ngModel)]="opcionSelected" (onClick)="seleccionarEleccionPorIndice(i + 1)"></p-radioButton>
                   <img src="{{eleccion.icono}}">
                   <label *ngIf="!eleccion.active" class="titulo-conteo" style=" text-decoration: line-through; color: darkgrey;">{{eleccion.titulo}} ({{eleccion.conteo}})</label>
                   <label *ngIf="eleccion.active" class="titulo-conteo" >{{eleccion.titulo}} ({{eleccion.conteo}})</label>

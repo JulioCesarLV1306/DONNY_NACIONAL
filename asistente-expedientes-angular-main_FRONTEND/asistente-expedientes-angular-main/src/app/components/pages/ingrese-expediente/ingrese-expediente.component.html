@@ -11,12 +11,16 @@
 </div>
 <div class="contenedor-inferior">
 
-  <input *ngIf="keyActual=='numero'" type="text" pInputText value="{{palabraDetectada}}-XXXX-XXX"
-    [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
-    <input *ngIf="keyActual=='anio'" type="text" pInputText value="{{numero}}-{{palabraDetectada}}-XXX"
-    [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
-    <input *ngIf="keyActual=='cuaderno'" type="text" pInputText value="{{numero}}-{{anio}}-{{palabraDetectada}}"
-    [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
+  <div class="expediente-preview">
+    {{ expedienteBusquedaPreview }}
+  </div>
+
+  <input *ngIf="keyActual=='numero'" type="number" pInputText [(ngModel)]="palabraDetectada" (ngModelChange)="onInputManual($event)" (keyup.enter)="confirmarIngresoManual()"
+    placeholder="INGRESE NÚMERO" [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
+    <input *ngIf="keyActual=='anio'" type="number" pInputText [(ngModel)]="palabraDetectada" (ngModelChange)="onInputManual($event)" (keyup.enter)="confirmarIngresoManual()"
+    placeholder="INGRESE AÑO" [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
+    <input *ngIf="keyActual=='cuaderno'" type="number" pInputText [(ngModel)]="palabraDetectada" (ngModelChange)="onInputManual($event)" (keyup.enter)="confirmarIngresoManual()"
+    placeholder="INGRESE CUADERNO" [style]="{'border-radius':'10px', 'display': 'block','margin':'auto','font-size':'80px','text-align':'center'}" />
     
 </div>
 <app-volver *ngIf="keyActual=='numero'"></app-volver>
