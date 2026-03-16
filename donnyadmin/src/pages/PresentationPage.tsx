@@ -1,79 +1,144 @@
+import { 
+  BarChart3, 
+  Users, 
+  LayoutGrid, 
+  ShieldCheck, 
+  Database, 
+  ArrowRight,
+  Info
+} from 'lucide-react';
+
 export default function PresentationPage() {
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-bold text-[#820000]">Panel de Administración DONNY</h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Este panel centraliza la operación del sistema DONNY para consulta de estadísticas, administración de usuarios y
-          configuración de módulos.
-        </p>
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-[#820000]">¿Qué se puede hacer?</h3>
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h4 className="text-sm font-semibold text-[#820000]">Estadísticas</h4>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
-              <li>Consultar resumen diario de carga documental.</li>
-              <li>Consultar estadísticas por rango de fechas.</li>
-              <li>Revisar detalle por módulo y por tipo de registro.</li>
-            </ul>
-          </article>
-
-          <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h4 className="text-sm font-semibold text-[#820000]">Usuarios</h4>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
-              <li>Crear usuarios del sistema.</li>
-              <li>Actualizar datos de usuarios existentes.</li>
-              <li>Filtrar y paginar el listado para búsqueda rápida.</li>
-            </ul>
-          </article>
-
-          <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h4 className="text-sm font-semibold text-[#820000]">Módulos</h4>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
-              <li>Registrar módulos de trabajo (IP, usuario, ubicación).</li>
-              <li>Actualizar configuración y estado operativo del módulo.</li>
-              <li>Consultar listado con filtros y paginación.</li>
-            </ul>
-          </article>
-
-          <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <h4 className="text-sm font-semibold text-[#820000]">Control de acceso</h4>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
-              <li>Ingreso autenticado al panel.</li>
-              <li>Gestión de sesión de usuario actual.</li>
-              <li>Navegación centralizada por módulos funcionales.</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-[#820000]">¿Qué datos se manejan?</h3>
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Usuarios</p>
-            <p className="mt-2 text-sm text-slate-700">
-              DNI, nombres, apellidos, teléfono, correo, tipo de usuario y estado activo/inactivo.
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+      
+      {/* Hero Section */}
+      <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 h-32 w-32 rounded-full bg-[#820000]/5 blur-3xl" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#820000]/10 text-[#820000] text-xs font-bold uppercase tracking-wider">
+              Sistema Centralizado
+            </div>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              Panel de Administración <span className="text-[#820000]">DONNY</span>
+            </h2>
+            <p className="max-w-2xl text-slate-600 leading-relaxed">
+              Gestión inteligente para la consulta de estadísticas, administración de usuarios y 
+              configuración avanzada de módulos operativos.
             </p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Módulos</p>
-            <p className="mt-2 text-sm text-slate-700">
-              IP, credenciales del módulo, descripción, ubicación física y estado de funcionamiento.
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Estadísticas</p>
-            <p className="mt-2 text-sm text-slate-700">
-              Fecha, número de hojas, tamaño en bytes, videos, actas y categorías judiciales (civil, familia, penal,
-              laboral, resoluciones).
-            </p>
+          <div className="hidden lg:block p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <Info className="text-slate-400" size={32} />
           </div>
         </div>
       </section>
+
+      {/* Grid de Capacidades */}
+      <section>
+        <div className="flex items-center gap-3 mb-6 px-2">
+          <div className="h-8 w-1 bg-[#820000] rounded-full" />
+          <h3 className="text-xl font-bold text-slate-800">Capacidades del Sistema</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FeatureCard 
+            icon={<BarChart3 size={20} />}
+            title="Estadísticas"
+            items={[
+              "Resumen diario de carga documental",
+              "Análisis por rangos de fechas personalizados",
+              "Detalle por módulo y tipo de registro"
+            ]}
+          />
+          <FeatureCard 
+            icon={<Users size={20} />}
+            title="Usuarios"
+            items={[
+              "Gestión de perfiles y nuevos registros",
+              "Actualización de credenciales y roles",
+              "Búsqueda avanzada con paginación"
+            ]}
+          />
+          <FeatureCard 
+            icon={<LayoutGrid size={20} />}
+            title="Módulos"
+            items={[
+              "Registro técnico (IP, Usuario, Ubicación)",
+              "Monitoreo de estado operativo real",
+              "Configuración de nodos de trabajo"
+            ]}
+          />
+          <FeatureCard 
+            icon={<ShieldCheck size={20} />}
+            title="Control de Acceso"
+            items={[
+              "Autenticación segura de nivel judicial",
+              "Gestión de sesiones activas",
+              "Navegación por módulos funcionales"
+            ]}
+          />
+        </div>
+      </section>
+
+      {/* Sección de Datos con diseño de Tags */}
+      <section className="rounded-3xl border border-slate-200 bg-slate-50/50 p-8">
+        <div className="flex items-center gap-3 mb-8">
+          <Database className="text-[#820000]" size={24} />
+          <h3 className="text-xl font-bold text-slate-800">Entidades de Datos</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <DataBox 
+            label="Usuarios" 
+            content="DNI, nombres, teléfono, correo y estado jerárquico." 
+          />
+          <DataBox 
+            label="Módulos" 
+            content="IP, credenciales, descripción técnica y ubicación física." 
+          />
+          <DataBox 
+            label="Estadísticas" 
+            content="Folios, bytes, videos, actas y categorías judiciales." 
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// Sub-componentes para mantener el código limpio
+function FeatureCard({ icon, title, items }: { icon: React.ReactNode, title: string, items: string[] }) {
+  return (
+    <article className="group rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:shadow-md hover:border-[#820000]/20">
+      <div className="flex items-center gap-4 mb-4">
+        <div className="p-2.5 rounded-xl bg-slate-50 text-[#820000] group-hover:bg-[#820000] group-hover:text-white transition-colors">
+          {icon}
+        </div>
+        <h4 className="font-bold text-slate-800">{title}</h4>
+      </div>
+      <ul className="space-y-3">
+        {items.map((item, i) => (
+          <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
+            <ArrowRight size={14} className="mt-0.5 text-[#820000] opacity-50" />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
+function DataBox({ label, content }: { label: string, content: string }) {
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <span className="text-[10px] font-black uppercase tracking-widest text-[#820000]/60">
+        Entidad
+      </span>
+      <h5 className="text-sm font-bold text-slate-800 mt-1 mb-2">{label}</h5>
+      <p className="text-xs text-slate-500 leading-relaxed">
+        {content}
+      </p>
     </div>
   );
 }

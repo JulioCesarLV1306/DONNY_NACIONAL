@@ -1,6 +1,20 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { moduloService } from '../services/modulo.service';
 import { CreateModuloPayload, Modulo } from '../types/modulo';
+import ToastMessage from '../components/ToastMessage';
+import { 
+  Plus, 
+  RefreshCw, 
+  Search, 
+  Server, 
+  X, 
+  Edit3, 
+  Monitor, 
+  MapPin, 
+  ChevronLeft, 
+  ChevronRight,
+  ShieldAlert
+} from 'lucide-react';
 
 const PAGE_SIZE = 10;
 const MODULES_TABLE_STATE_KEY = 'donnyadmin_modules_table_state';
@@ -25,95 +39,56 @@ const initialForm: CreateModuloPayload = {
 };
 
 export default function ModulesPage() {
-  const [form, setForm] = useState<CreateModuloPayload>(initialForm);
-  const [createdModulo, setCreatedModulo] = useState<Modulo | null>(null);
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // UI States
+  const [toastMessage, setToastMessage] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Data States
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const [isLoadingList, setIsLoadingList] = useState(false);
   const [listError, setListError] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+
+  // Filter States
   const [ipFilter, setIpFilter] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<'ALL' | '1' | '0'>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
   const [goToPageInput, setGoToPageInput] = useState('1');
+
+  // Form States
+  const [form, setForm] = useState<CreateModuloPayload>(initialForm);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  
   const [editingModuloId, setEditingModuloId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<CreateModuloPayload>(initialForm);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState('');
-  const [updatedModulo, setUpdatedModulo] = useState<Modulo | null>(null);
 
+  // --- LOGIC: Persistence ---
   useEffect(() => {
     try {
       const persisted = localStorage.getItem(MODULES_TABLE_STATE_KEY);
-      if (!persisted) {
-        return;
+      if (persisted) {
+        const parsed = JSON.parse(persisted);
+        setIpFilter(parsed.ipFilter || '');
+        setEstadoFilter(parsed.estadoFilter || 'ALL');
+        if (parsed.currentPage) setCurrentPage(parsed.currentPage);
       }
-
-      const parsed = JSON.parse(persisted) as {
-        ipFilter?: string;
-        estadoFilter?: 'ALL' | '1' | '0';
-        currentPage?: number;
-      };
-
-      setIpFilter(parsed.ipFilter || '');
-      setEstadoFilter(parsed.estadoFilter || 'ALL');
-      if (parsed.currentPage && parsed.currentPage > 0) {
-        setCurrentPage(parsed.currentPage);
-      }
-    } catch {
-      localStorage.removeItem(MODULES_TABLE_STATE_KEY);
-    }
+    } catch { localStorage.removeItem(MODULES_TABLE_STATE_KEY); }
   }, []);
 
-  const filteredModulos = useMemo(() => {
-    const normalizedIp = ipFilter.trim().toLowerCase();
-
-    return modulos.filter((modulo) => {
-      const ipOk = modulo.cPcIp.toLowerCase().includes(normalizedIp);
-      const estadoOk = estadoFilter === 'ALL' ? true : String(modulo.nEstado) === estadoFilter;
-      return ipOk && estadoOk;
-    });
-  }, [modulos, ipFilter, estadoFilter]);
-
-  const sortedModulos = useMemo(
-    () => [...filteredModulos].sort((a, b) => b.nIdModulo - a.nIdModulo),
-    [filteredModulos]
-  );
-
-  const totalPages = Math.max(1, Math.ceil(sortedModulos.length / PAGE_SIZE));
-
-  const paginatedModulos = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return sortedModulos.slice(start, start + PAGE_SIZE);
-  }, [sortedModulos, currentPage]);
-
   useEffect(() => {
-    setCurrentPage(1);
-  }, [ipFilter, estadoFilter]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      MODULES_TABLE_STATE_KEY,
-      JSON.stringify({
-        ipFilter,
-        estadoFilter,
-        currentPage,
-      })
-    );
+    localStorage.setItem(MODULES_TABLE_STATE_KEY, JSON.stringify({ ipFilter, estadoFilter, currentPage }));
+    setGoToPageInput(String(currentPage));
   }, [ipFilter, estadoFilter, currentPage]);
 
-  useEffect(() => {
-    setGoToPageInput(String(currentPage));
-  }, [currentPage]);
-
+  // --- LOGIC: Fetch ---
   const loadModulos = async () => {
     setListError('');
     setIsLoadingList(true);
-
     try {
       const response = await moduloService.listar();
       setModulos(response);
-      setCurrentPage(1);
     } catch (loadError) {
       setListError(loadError instanceof Error ? loadError.message : 'No se pudo listar módulos.');
     } finally {
@@ -121,40 +96,41 @@ export default function ModulesPage() {
     }
   };
 
-  useEffect(() => {
-    void loadModulos();
-  }, []);
+  useEffect(() => { void loadModulos(); }, []);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // --- LOGIC: Filter & Pagination ---
+  const filteredModulos = useMemo(() => {
+    const normalizedIp = ipFilter.trim().toLowerCase();
+    return modulos.filter((m) => {
+      const ipOk = m.cPcIp.toLowerCase().includes(normalizedIp);
+      const estadoOk = estadoFilter === 'ALL' ? true : String(m.nEstado) === estadoFilter;
+      return ipOk && estadoOk;
+    });
+  }, [modulos, ipFilter, estadoFilter]);
+
+  const sortedModulos = useMemo(() => [...filteredModulos].sort((a, b) => b.nIdModulo - a.nIdModulo), [filteredModulos]);
+  const totalPages = Math.max(1, Math.ceil(sortedModulos.length / PAGE_SIZE));
+  const paginatedModulos = useMemo(() => sortedModulos.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE), [sortedModulos, currentPage]);
+
+  useEffect(() => { setCurrentPage(1); }, [ipFilter, estadoFilter]);
+
+  // --- ACTIONS ---
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
     setError('');
-    setCreatedModulo(null);
     setIsSubmitting(true);
-
     try {
-      const payload: CreateModuloPayload = {
-        ...form,
-        cPcIp: form.cPcIp.trim(),
-        cPcUsuario: form.cPcUsuario.trim(),
-        cPcClave: form.cPcClave.trim(),
-        xDescripcion: form.xDescripcion.trim(),
-        cUbicacion: form.cUbicacion.trim(),
-      };
-
-      const response = await moduloService.crear(payload);
-      setCreatedModulo(response);
+      await moduloService.crear(form);
+      setToastMessage('Módulo registrado con éxito');
       setForm(initialForm);
+      setIsCreateModalOpen(false);
       await loadModulos();
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'No se pudo crear el módulo.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear.');
+    } finally { setIsSubmitting(false); }
   };
 
   const startEditModulo = (modulo: Modulo) => {
-    setUpdatedModulo(null);
-    setUpdateError('');
     setEditingModuloId(modulo.nIdModulo);
     setEditForm({
       cPcIp: modulo.cPcIp || '',
@@ -166,211 +142,121 @@ export default function ModulesPage() {
     });
   };
 
-  const cancelEditModulo = () => {
-    setEditingModuloId(null);
-    setEditForm(initialForm);
-    setUpdateError('');
-  };
-
-  const handleUpdateModulo = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!editingModuloId) {
-      return;
-    }
-
-    setUpdateError('');
-    setUpdatedModulo(null);
+  const handleUpdateModulo = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingModuloId) return;
     setIsUpdating(true);
-
     try {
-      const payload: CreateModuloPayload = {
-        ...editForm,
-        cPcIp: editForm.cPcIp.trim(),
-        cPcUsuario: editForm.cPcUsuario.trim(),
-        cPcClave: editForm.cPcClave.trim(),
-        xDescripcion: editForm.xDescripcion.trim(),
-        cUbicacion: editForm.cUbicacion.trim(),
-      };
-
-      const response = await moduloService.actualizar(editingModuloId, payload);
-      setUpdatedModulo(response);
+      await moduloService.actualizar(editingModuloId, editForm);
+      setToastMessage('Módulo actualizado correctamente');
+      setEditingModuloId(null);
       await loadModulos();
-    } catch (submitError) {
-      setUpdateError(submitError instanceof Error ? submitError.message : 'No se pudo actualizar el módulo.');
-    } finally {
-      setIsUpdating(false);
-    }
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : 'Error al actualizar.');
+    } finally { setIsUpdating(false); }
   };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">Módulos</h2>
-        <p className="mt-1 text-sm text-slate-500">Crear nuevo módulo</p>
+    <div className="max-w-7xl mx-auto space-y-6 p-4 animate-in fade-in duration-700">
+      <ToastMessage message={toastMessage} onClose={() => setToastMessage('')} />
 
-      <form onSubmit={handleSubmit} className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <input
-          type="text"
-          value={form.cPcIp}
-          onChange={(e) => setForm((prev) => ({ ...prev, cPcIp: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          placeholder="IP del módulo (cPcIp)"
-          required
-        />
-
-        <input
-          type="text"
-          value={form.cPcUsuario}
-          onChange={(e) => setForm((prev) => ({ ...prev, cPcUsuario: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          placeholder="Usuario del módulo (cPcUsuario)"
-          required
-        />
-
-        <input
-          type="password"
-          value={form.cPcClave}
-          onChange={(e) => setForm((prev) => ({ ...prev, cPcClave: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          placeholder="Clave del módulo (cPcClave)"
-          required
-        />
-
-        <select
-          value={form.nEstado}
-          onChange={(e) => setForm((prev) => ({ ...prev, nEstado: Number(e.target.value) as 0 | 1 }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        >
-          <option value={1}>Activo (1)</option>
-          <option value={0}>Inactivo (0)</option>
-        </select>
-
-        <input
-          type="text"
-          value={form.xDescripcion}
-          onChange={(e) => setForm((prev) => ({ ...prev, xDescripcion: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm md:col-span-2"
-          placeholder="Descripción (xDescripcion)"
-          required
-        />
-
-        <input
-          type="text"
-          value={form.cUbicacion}
-          onChange={(e) => setForm((prev) => ({ ...prev, cUbicacion: e.target.value }))}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm md:col-span-2"
-          placeholder="Ubicación (cUbicacion)"
-          required
-        />
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-lg bg-[#820000] px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-70"
-        >
-          {isSubmitting ? 'Creando...' : 'Crear Módulo'}
-        </button>
-      </form>
-
-        {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
-        {createdModulo && (
-          <pre className="mt-4 overflow-auto rounded-lg bg-[#820000] p-3 text-xs text-slate-100">
-            {JSON.stringify(createdModulo, null, 2)}
-          </pre>
-        )}
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">Listado de Módulos</h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Ordenado por ID descendente y paginado de {PAGE_SIZE} en {PAGE_SIZE}.
-            </p>
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#820000]/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+            <Server className="text-[#820000]" size={28} />
           </div>
-          <button
-            type="button"
-            onClick={() => void loadModulos()}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-          >
-            Recargar
-          </button>
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Módulos</h2>
+            <p className="text-slate-500 mt-1 text-sm font-medium uppercase tracking-tight">Infraestructura y Puntos de Atención</p>
+          </div>
         </div>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="relative z-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#820000] px-6 py-3 text-sm font-bold text-white transition-all hover:bg-slate-800 hover:shadow-xl hover:shadow-[#820000]/20 active:scale-95"
+        >
+          <Plus size={20} strokeWidth={3} />
+          Registrar Módulo
+        </button>
+      </div>
 
-        {listError && <p className="mt-3 text-sm text-rose-600">{listError}</p>}
-
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <input
-            type="text"
-            value={ipFilter}
-            onChange={(e) => setIpFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="Filtrar por IP"
-          />
+      {/* FILTROS Y LISTADO */}
+      <section className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-[2]">
+            <Search className="absolute left-4 top-3 text-slate-400" size={18} />
+            <input
+              type="text"
+              value={ipFilter}
+              onChange={(e) => setIpFilter(e.target.value)}
+              className="w-full rounded-2xl border border-slate-200 pl-12 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#820000]/10 outline-none transition-all"
+              placeholder="Filtrar por dirección IP..."
+            />
+          </div>
           <select
             value={estadoFilter}
             onChange={(e) => setEstadoFilter(e.target.value as 'ALL' | '1' | '0')}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="flex-1 rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-[#820000]/10"
           >
             <option value="ALL">Todos los estados</option>
-            <option value="1">Activos (1)</option>
-            <option value="0">Inactivos (0)</option>
+            <option value="1">🟢 Activos</option>
+            <option value="0">🔴 Inactivos</option>
           </select>
+          <button
+            onClick={() => void loadModulos()}
+            className="p-3 rounded-2xl border border-slate-200 text-slate-600 hover:bg-white hover:text-[#820000] transition-all"
+          >
+            <RefreshCw size={20} className={isLoadingList ? 'animate-spin' : ''} />
+          </button>
         </div>
 
-        <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
-          <table className="min-w-full divide-y divide-slate-200 bg-white text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50/50 border-b border-slate-100">
               <tr>
-                <th className="px-3 py-2">ID</th>
-                <th className="px-3 py-2">IP</th>
-                <th className="px-3 py-2">Usuario</th>
-                <th className="px-3 py-2">Descripción</th>
-                <th className="px-3 py-2">Ubicación</th>
-                <th className="px-3 py-2">Estado</th>
-                <th className="px-3 py-2">Acciones</th>
+                <th className="px-6 py-4">ID</th>
+                <th className="px-6 py-4">Dirección IP / Red</th>
+                <th className="px-6 py-4">Credencial</th>
+                <th className="px-6 py-4">Descripción / Uso</th>
+                <th className="px-6 py-4">Ubicación Física</th>
+                <th className="px-6 py-4">Estado</th>
+                <th className="px-6 py-4 text-center">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {!isLoadingList && paginatedModulos.length === 0 && (
-                <tr>
-                  <td className="px-3 py-4 text-center text-slate-500" colSpan={7}>
-                    Sin registros.
+            <tbody className="divide-y divide-slate-100">
+              {isLoadingList ? (
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-slate-400 font-medium">Sincronizando módulos operativos...</td></tr>
+              ) : paginatedModulos.length === 0 ? (
+                <tr><td colSpan={7} className="px-6 py-12 text-center text-slate-400">Sin módulos registrados.</td></tr>
+              ) : paginatedModulos.map((m) => (
+                <tr key={m.nIdModulo} className="hover:bg-slate-50/80 transition-colors group">
+                  <td className="px-6 py-4 font-mono text-xs text-slate-400">{m.nIdModulo}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                      <span className="font-bold text-slate-700">{m.cPcIp}</span>
+                    </div>
                   </td>
-                </tr>
-              )}
-              {isLoadingList && (
-                <tr>
-                  <td className="px-3 py-4 text-center text-slate-500" colSpan={7}>
-                    Cargando listado...
+                  <td className="px-6 py-4 text-slate-500 font-medium">{m.cPcUsuario}</td>
+                  <td className="px-6 py-4 text-slate-600 italic">"{m.xDescripcion}"</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-1.5 text-slate-500">
+                      <MapPin size={14} className="text-slate-400" />
+                      {m.cUbicacion}
+                    </div>
                   </td>
-                </tr>
-              )}
-              {paginatedModulos.map((modulo) => (
-                <tr key={modulo.nIdModulo}>
-                  <td className="px-3 py-2 font-medium">{modulo.nIdModulo}</td>
-                  <td className="px-3 py-2">{modulo.cPcIp}</td>
-                  <td className="px-3 py-2">{modulo.cPcUsuario}</td>
-                  <td className="px-3 py-2">{modulo.xDescripcion}</td>
-                  <td className="px-3 py-2">{modulo.cUbicacion}</td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`inline-flex rounded-full border px-2 py-1 text-xs font-semibold ${getEstadoBadgeClass(
-                        modulo.nEstado
-                      )}`}
-                      title={`Estado ${modulo.nEstado}`}
-                    >
-                      {getEstadoLabel(modulo.nEstado)}
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border ${getEstadoBadgeClass(m.nEstado)}`}>
+                      {getEstadoLabel(m.nEstado)}
                     </span>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-6 py-4 text-center">
                     <button
-                      type="button"
-                      onClick={() => startEditModulo(modulo)}
-                      className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                      onClick={() => startEditModulo(m)}
+                      className="p-2 rounded-xl text-slate-400 hover:text-[#820000] hover:bg-[#820000]/5 transition-all opacity-0 group-hover:opacity-100"
                     >
-                      Editar
+                      <Edit3 size={18} />
                     </button>
                   </td>
                 </tr>
@@ -379,137 +265,169 @@ export default function ModulesPage() {
           </table>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-xs text-slate-500">
-            Página {currentPage} de {totalPages}
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
+        {/* PAGINACIÓN */}
+        <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/30 font-bold">
+          <div className="text-xs text-slate-400">Pág {currentPage} / {totalPages}</div>
+          <div className="flex items-center gap-2">
             <button
-              type="button"
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-50"
+              onClick={() => setCurrentPage(p => p - 1)}
+              className="p-2 rounded-xl border border-slate-200 disabled:opacity-30 hover:bg-white"
             >
-              Anterior
-            </button>
-            <button
-              type="button"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-50"
-            >
-              Siguiente
+              <ChevronLeft size={18} />
             </button>
             <input
               type="number"
-              min={1}
-              max={totalPages}
               value={goToPageInput}
               onChange={(e) => setGoToPageInput(e.target.value)}
-              className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-xs"
+              onBlur={() => setCurrentPage(Math.min(totalPages, Math.max(1, Number(goToPageInput))))}
+              className="w-12 text-center text-xs py-2 rounded-xl border border-slate-200 outline-none focus:border-[#820000]"
             />
             <button
-              type="button"
-              onClick={() => {
-                const target = Number(goToPageInput);
-                if (Number.isNaN(target)) {
-                  return;
-                }
-                setCurrentPage(Math.min(totalPages, Math.max(1, target)));
-              }}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="p-2 rounded-xl border border-slate-200 disabled:opacity-30 hover:bg-white"
             >
-              Ir a página
+              <ChevronRight size={18} />
             </button>
           </div>
         </div>
       </section>
 
-      {editingModuloId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#820000]/30 p-4 backdrop-blur-sm">
-          <section className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-slate-900">Actualizar Módulo #{editingModuloId}</h3>
-            <p className="mt-1 text-sm text-slate-500">Editar datos del módulo seleccionado</p>
-
-            <form onSubmit={handleUpdateModulo} className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <input
-                type="text"
-                value={editForm.cPcIp}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, cPcIp: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="IP del módulo (cPcIp)"
-                required
-              />
-
-              <input
-                type="text"
-                value={editForm.cPcUsuario}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, cPcUsuario: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="Usuario del módulo (cPcUsuario)"
-                required
-              />
-
-              <input
-                type="password"
-                value={editForm.cPcClave}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, cPcClave: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="Clave del módulo (cPcClave)"
-                required
-              />
-
-              <select
-                value={editForm.nEstado}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, nEstado: Number(e.target.value) as 0 | 1 }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      {/* MODAL CREAR / EDITAR */}
+      {(isCreateModalOpen || editingModuloId !== null) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300" 
+            onClick={() => { setIsCreateModalOpen(false); setEditingModuloId(null); }} 
+          />
+          <section className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-[#820000] rounded-2xl text-white shadow-lg shadow-[#820000]/30">
+                  <Monitor size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">
+                    {isCreateModalOpen ? 'Configurar Módulo' : `Editar Módulo #${editingModuloId}`}
+                  </h3>
+                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Estación de Trabajo Judicial</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setIsCreateModalOpen(false); setEditingModuloId(null); }}
+                className="p-2 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
               >
-                <option value={1}>Activo (1)</option>
-                <option value={0}>Inactivo (0)</option>
-              </select>
+                <X size={24} />
+              </button>
+            </div>
 
-              <input
-                type="text"
-                value={editForm.xDescripcion}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, xDescripcion: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm md:col-span-2"
-                placeholder="Descripción (xDescripcion)"
-                required
-              />
+            <form 
+              onSubmit={isCreateModalOpen ? handleSubmit : handleUpdateModulo} 
+              className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Dirección IP</label>
+                <input
+                  type="text"
+                  value={isCreateModalOpen ? form.cPcIp : editForm.cPcIp}
+                  onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, cPcIp: e.target.value})) : setEditForm(p => ({...p, cPcIp: e.target.value}))}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#820000]/5 outline-none transition-all"
+                  placeholder="192.168.X.X"
+                  required
+                />
+              </div>
 
-              <input
-                type="text"
-                value={editForm.cUbicacion}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, cUbicacion: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm md:col-span-2"
-                placeholder="Ubicación (cUbicacion)"
-                required
-              />
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Estado Operativo</label>
+                <select
+                  value={isCreateModalOpen ? form.nEstado : editForm.nEstado}
+                  onChange={(e) => {
+                    const val = Number(e.target.value) as 0 | 1;
+                    isCreateModalOpen ? setForm(p => ({...p, nEstado: val})) : setEditForm(p => ({...p, nEstado: val}));
+                  }}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-[#820000]/5 outline-none"
+                >
+                  <option value={1}>ACTIVO / DISPONIBLE</option>
+                  <option value={0}>INACTIVO / MANTENIMIENTO</option>
+                </select>
+              </div>
 
-              <div className="flex items-center gap-2">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Usuario de Acceso</label>
+                <input
+                  type="text"
+                  value={isCreateModalOpen ? form.cPcUsuario : editForm.cPcUsuario}
+                  onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, cPcUsuario: e.target.value})) : setEditForm(p => ({...p, cPcUsuario: e.target.value}))}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium outline-none"
+                  placeholder="User_DONNY"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Clave de Enlace</label>
+                <input
+                  type="password"
+                  value={isCreateModalOpen ? form.cPcClave : editForm.cPcClave}
+                  onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, cPcClave: e.target.value})) : setEditForm(p => ({...p, cPcClave: e.target.value}))}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none"
+                  placeholder="••••••••"
+                  required={isCreateModalOpen}
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Descripción del Módulo</label>
+                <input
+                  type="text"
+                  value={isCreateModalOpen ? form.xDescripcion : editForm.xDescripcion}
+                  onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, xDescripcion: e.target.value})) : setEditForm(p => ({...p, xDescripcion: e.target.value}))}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                  placeholder="Ej: Módulo de Atención al Público - Sala 04"
+                  required
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Ubicación Física</label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-3 text-slate-300" size={18} />
+                  <input
+                    type="text"
+                    value={isCreateModalOpen ? form.cUbicacion : editForm.cUbicacion}
+                    onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, cUbicacion: e.target.value})) : setEditForm(p => ({...p, cUbicacion: e.target.value}))}
+                    className="w-full rounded-2xl border border-slate-200 pl-11 pr-4 py-3 text-sm"
+                    placeholder="Sede Central - Piso 2"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="md:col-span-2 flex gap-4 mt-6">
                 <button
                   type="submit"
-                  disabled={isUpdating}
-                  className="rounded-lg bg-[#820000] px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-70"
+                  disabled={isSubmitting || isUpdating}
+                  className="flex-1 bg-[#820000] text-white font-black py-4 rounded-2xl hover:bg-slate-900 transition-all shadow-xl shadow-[#820000]/20 disabled:opacity-50 uppercase tracking-widest text-xs"
                 >
-                  {isUpdating ? 'Actualizando...' : 'Guardar Cambios'}
+                  {isSubmitting || isUpdating ? 'Procesando...' : isCreateModalOpen ? 'Guardar Configuración' : 'Actualizar Módulo'}
                 </button>
                 <button
                   type="button"
-                  onClick={cancelEditModulo}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  onClick={() => { setIsCreateModalOpen(false); setEditingModuloId(null); }}
+                  className="px-8 text-slate-500 font-bold hover:bg-slate-50 rounded-2xl transition-all"
                 >
-                  Cancelar
+                  Cerrar
                 </button>
               </div>
-            </form>
 
-            {updateError && <p className="mt-3 text-sm text-rose-600">{updateError}</p>}
-            {updatedModulo && (
-              <pre className="mt-4 overflow-auto rounded-lg bg-[#820000] p-3 text-xs text-slate-100">
-                {JSON.stringify(updatedModulo, null, 2)}
-              </pre>
-            )}
+              {(error || updateError) && (
+                <div className="md:col-span-2 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center gap-3 text-rose-600 text-xs font-bold">
+                  <ShieldAlert size={18} />
+                  {error || updateError}
+                </div>
+              )}
+            </form>
           </section>
         </div>
       )}

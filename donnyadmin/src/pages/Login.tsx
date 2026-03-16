@@ -1,8 +1,10 @@
 import { FormEvent, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import ToastMessage from '../components/ToastMessage';
 
 export default function Login() {
+  const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
 
@@ -10,8 +12,9 @@ export default function Login() {
   const [c_dni, setDni] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirectingAfterToast, setIsRedirectingAfterToast] = useState(false);
 
-  if (isAuthenticated) {
+  if (isAuthenticated && !isRedirectingAfterToast) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -21,16 +24,23 @@ export default function Login() {
     setIsSubmitting(true);
     try {
       await login({ x_correo: x_correo.trim(), c_dni: c_dni.trim() });
-      navigate('/dashboard', { replace: true });
+      setToastMessage('Usuario autenticado correctamente.');
+      setIsRedirectingAfterToast(true);
+      window.setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 1200);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo autenticar.');
+      setIsRedirectingAfterToast(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
+    
     <div className="flex min-h-screen items-center justify-center bg-slate-100">
+      <ToastMessage message={toastMessage} onClose={() => setToastMessage('')} />
       <div className="flex w-full max-w-4xl overflow-hidden rounded-2xl shadow-lg">
 
         {/* ── Panel izquierdo (formulario) ── */}

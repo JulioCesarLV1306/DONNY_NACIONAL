@@ -1,6 +1,20 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { usuarioService } from '../services/usuario.service';
 import { CreateUserPayload, UserResponse } from '../types/user';
+import ToastMessage from '../components/ToastMessage';
+import { 
+  Plus, 
+  RefreshCw, 
+  Search, 
+  UserPlus, 
+  X, 
+  Edit3, 
+  Mail, 
+  Fingerprint, 
+  ChevronLeft, 
+  ChevronRight,
+  MoreHorizontal
+} from 'lucide-react';
 
 const PAGE_SIZE = 10;
 const USERS_TABLE_STATE_KEY = 'donnyadmin_users_table_state';
@@ -22,14 +36,6 @@ const USER_TYPE_OPTIONS = Object.entries(USER_TYPES)
   .map(([id, data]) => ({ id: Number(id), name: data.name }))
   .sort((a, b) => a.id - b.id);
 
-function getUserTypeName(typeId: number) {
-  return USER_TYPES[typeId]?.name || `Tipo ${typeId}`;
-}
-
-function getUserTypeBadgeClass(typeId: number) {
-  return USER_TYPES[typeId]?.badgeClass || 'bg-slate-100 text-slate-700 border-slate-200';
-}
-
 const initialForm: CreateUserPayload = {
   n_id_tipo: 1,
   c_dni: '',
@@ -42,139 +48,99 @@ const initialForm: CreateUserPayload = {
 };
 
 export default function UsersPage() {
-  const [form, setForm] = useState<CreateUserPayload>(initialForm);
-  const [createdUser, setCreatedUser] = useState<UserResponse | null>(null);
-  const [createError, setCreateError] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
+  // UI States
+  const [toastMessage, setToastMessage] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  
+  // Data States
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [isLoadingList, setIsLoadingList] = useState(false);
   const [listError, setListError] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Filter States
   const [dniFilter, setDniFilter] = useState('');
   const [correoFilter, setCorreoFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [goToPageInput, setGoToPageInput] = useState('1');
+
+  // Form States (Create)
+  const [form, setForm] = useState<CreateUserPayload>(initialForm);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
+
+  // Form States (Edit)
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<CreateUserPayload>(initialForm);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState('');
-  const [updatedUser, setUpdatedUser] = useState<UserResponse | null>(null);
 
+  // --- LOGIC: Persistence ---
   useEffect(() => {
     try {
       const persisted = localStorage.getItem(USERS_TABLE_STATE_KEY);
-      if (!persisted) {
-        return;
+      if (persisted) {
+        const parsed = JSON.parse(persisted);
+        setDniFilter(parsed.dniFilter || '');
+        setCorreoFilter(parsed.correoFilter || '');
+        if (parsed.currentPage) setCurrentPage(parsed.currentPage);
       }
-
-      const parsed = JSON.parse(persisted) as {
-        dniFilter?: string;
-        correoFilter?: string;
-        currentPage?: number;
-      };
-
-      setDniFilter(parsed.dniFilter || '');
-      setCorreoFilter(parsed.correoFilter || '');
-      if (parsed.currentPage && parsed.currentPage > 0) {
-        setCurrentPage(parsed.currentPage);
-      }
-    } catch {
-      localStorage.removeItem(USERS_TABLE_STATE_KEY);
-    }
+    } catch { localStorage.removeItem(USERS_TABLE_STATE_KEY); }
   }, []);
 
-  const filteredUsers = useMemo(() => {
-    const normalizedDni = dniFilter.trim().toLowerCase();
-    const normalizedCorreo = correoFilter.trim().toLowerCase();
-
-    return users.filter((user) => {
-      const dniOk = user.c_dni.toLowerCase().includes(normalizedDni);
-      const correoValue = (user.x_correo || '').toLowerCase();
-      const correoOk = correoValue.includes(normalizedCorreo);
-      return dniOk && correoOk;
-    });
-  }, [users, dniFilter, correoFilter]);
-
-  const sortedUsers = useMemo(
-    () => [...filteredUsers].sort((a, b) => b.n_id_usuario - a.n_id_usuario),
-    [filteredUsers]
-  );
-
-  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / PAGE_SIZE));
-
-  const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return sortedUsers.slice(start, start + PAGE_SIZE);
-  }, [sortedUsers, currentPage]);
-
   useEffect(() => {
-    setCurrentPage(1);
-  }, [dniFilter, correoFilter]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      USERS_TABLE_STATE_KEY,
-      JSON.stringify({
-        dniFilter,
-        correoFilter,
-        currentPage,
-      })
-    );
+    localStorage.setItem(USERS_TABLE_STATE_KEY, JSON.stringify({ dniFilter, correoFilter, currentPage }));
+    setGoToPageInput(String(currentPage));
   }, [dniFilter, correoFilter, currentPage]);
 
-  useEffect(() => {
-    setGoToPageInput(String(currentPage));
-  }, [currentPage]);
-
+  // --- LOGIC: Fetch ---
   const loadUsers = async () => {
     setListError('');
     setIsLoadingList(true);
-
     try {
       const response = await usuarioService.listar();
       setUsers(response);
-      setCurrentPage(1);
     } catch (error) {
-      setListError(error instanceof Error ? error.message : 'No se pudo listar usuarios.');
+      setListError(error instanceof Error ? error.message : 'Error al cargar usuarios.');
     } finally {
       setIsLoadingList(false);
     }
   };
 
-  useEffect(() => {
-    void loadUsers();
-  }, []);
+  useEffect(() => { void loadUsers(); }, []);
 
-  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // --- LOGIC: Filter & Pagination ---
+  const filteredUsers = useMemo(() => {
+    const d = dniFilter.trim().toLowerCase();
+    const c = correoFilter.trim().toLowerCase();
+    return users.filter(u => u.c_dni.toLowerCase().includes(d) && (u.x_correo || '').toLowerCase().includes(c));
+  }, [users, dniFilter, correoFilter]);
+
+  const sortedUsers = useMemo(() => [...filteredUsers].sort((a, b) => b.n_id_usuario - a.n_id_usuario), [filteredUsers]);
+  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / PAGE_SIZE));
+  const paginatedUsers = useMemo(() => sortedUsers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE), [sortedUsers, currentPage]);
+
+  useEffect(() => { setCurrentPage(1); }, [dniFilter, correoFilter]);
+
+  // --- ACTIONS: Create ---
+  const handleCreate = async (e: FormEvent) => {
+    e.preventDefault();
     setCreateError('');
-    setCreatedUser(null);
     setIsCreating(true);
-
     try {
-      const payload: CreateUserPayload = {
-        ...form,
-        c_dni: form.c_dni.trim(),
-        x_ape_paterno: form.x_ape_paterno.trim(),
-        x_ape_materno: form.x_ape_materno.trim(),
-        x_nombres: form.x_nombres.trim(),
-        c_telefono: form.c_telefono.trim(),
-        x_correo: form.x_correo.trim(),
-      };
-
-      const response = await usuarioService.crear(payload);
-      setCreatedUser(response);
+      await usuarioService.crear(form);
+      setToastMessage('Usuario creado correctamente');
       setForm(initialForm);
+      setIsCreateModalOpen(false);
       await loadUsers();
     } catch (error) {
-      setCreateError(error instanceof Error ? error.message : 'No se pudo crear el usuario.');
+      setCreateError(error instanceof Error ? error.message : 'Error al crear.');
     } finally {
       setIsCreating(false);
     }
   };
 
+  // --- ACTIONS: Edit ---
   const startEditUser = (user: UserResponse) => {
-    setUpdatedUser(null);
-    setUpdateError('');
     setEditingUserId(user.n_id_usuario);
     setEditForm({
       n_id_tipo: user.n_id_tipo,
@@ -184,231 +150,117 @@ export default function UsersPage() {
       x_nombres: user.x_nombres || '',
       c_telefono: user.c_telefono || '',
       x_correo: user.x_correo || '',
-      l_activo: (user.l_activo === 'N' ? 'N' : 'S') as 'S' | 'N',
+      l_activo: user.l_activo === 'N' ? 'N' : 'S',
     });
   };
 
-  const cancelEditUser = () => {
-    setEditingUserId(null);
-    setEditForm(initialForm);
-    setUpdateError('');
-  };
-
-  const handleUpdateUser = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!editingUserId) {
-      return;
-    }
-
-    setUpdateError('');
-    setUpdatedUser(null);
+  const handleUpdateUser = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingUserId) return;
     setIsUpdating(true);
-
     try {
-      const payload: CreateUserPayload = {
-        ...editForm,
-        c_dni: editForm.c_dni.trim(),
-        x_ape_paterno: editForm.x_ape_paterno.trim(),
-        x_ape_materno: editForm.x_ape_materno.trim(),
-        x_nombres: editForm.x_nombres.trim(),
-        c_telefono: editForm.c_telefono.trim(),
-        x_correo: editForm.x_correo.trim(),
-      };
-
-      const response = await usuarioService.actualizar(editingUserId, payload);
-      setUpdatedUser(response);
+      await usuarioService.actualizar(editingUserId, editForm);
+      setToastMessage('Usuario actualizado con éxito');
+      setEditingUserId(null);
       await loadUsers();
     } catch (error) {
-      setUpdateError(error instanceof Error ? error.message : 'No se pudo actualizar el usuario.');
+      setUpdateError(error instanceof Error ? error.message : 'Error al actualizar.');
     } finally {
       setIsUpdating(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">Registro de Usuarios</h2>
-        <p className="mt-1 text-sm text-slate-500">Crear nuevo usuario</p>
+    <div className="max-w-7xl mx-auto space-y-6 p-4 animate-in fade-in duration-700">
+      <ToastMessage message={toastMessage} onClose={() => setToastMessage('')} />
 
-        <form onSubmit={handleCreate} className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <select
-            value={form.n_id_tipo}
-            onChange={(e) => setForm((prev) => ({ ...prev, n_id_tipo: Number(e.target.value) || 1 }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            required
-          >
-            {USER_TYPE_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            value={form.c_dni}
-            onChange={(e) => setForm((prev) => ({ ...prev, c_dni: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="c_dni"
-            required
-          />
-          <input
-            type="text"
-            value={form.x_ape_paterno}
-            onChange={(e) => setForm((prev) => ({ ...prev, x_ape_paterno: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="Apellido paterno"
-            required
-          />
-          <input
-            type="text"
-            value={form.x_ape_materno}
-            onChange={(e) => setForm((prev) => ({ ...prev, x_ape_materno: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="Apellido materno"
-            required
-          />
-          <input
-            type="text"
-            value={form.x_nombres}
-            onChange={(e) => setForm((prev) => ({ ...prev, x_nombres: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="Nombres"
-            required
-          />
-          <input
-            type="text"
-            value={form.c_telefono}
-            onChange={(e) => setForm((prev) => ({ ...prev, c_telefono: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="Teléfono"
-            required
-          />
-          <input
-            type="email"
-            value={form.x_correo}
-            onChange={(e) => setForm((prev) => ({ ...prev, x_correo: e.target.value }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm md:col-span-2"
-            placeholder="Correo"
-            required
-          />
-          <select
-            value={form.l_activo}
-            onChange={(e) => setForm((prev) => ({ ...prev, l_activo: e.target.value as 'S' | 'N' }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="S">Activo (S)</option>
-            <option value="N">Inactivo (N)</option>
-          </select>
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#820000]/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+        <div className="relative z-10">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Usuarios</h2>
+          <p className="text-slate-500 mt-1">Control de acceso institucional del sistema DONNY.</p>
+        </div>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="relative z-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#820000] px-6 py-3 text-sm font-bold text-white transition-all hover:bg-slate-800 hover:shadow-xl hover:shadow-[#820000]/20 active:scale-95"
+        >
+          <Plus size={20} strokeWidth={3} />
+          Nuevo Usuario
+        </button>
+      </div>
 
-          <button
-            type="submit"
-            disabled={isCreating}
-            className="rounded-lg bg-[#820000] px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-70"
-          >
-            {isCreating ? 'Creando...' : 'Crear Usuario'}
-          </button>
-        </form>
-
-        {createError && <p className="mt-3 text-sm text-rose-600">{createError}</p>}
-        {createdUser && (
-          <pre className="mt-4 overflow-auto rounded-lg bg-[#820000] p-3 text-xs text-slate-100">
-            {JSON.stringify(createdUser, null, 2)}
-          </pre>
-        )}
-      </section>
-
-    
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">Listado de Usuarios</h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Ordenado por ID descendente y paginado de {PAGE_SIZE} en {PAGE_SIZE}.
-            </p>
+      {/* FILTROS Y TABLA */}
+      <section className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Fingerprint className="absolute left-4 top-3 text-slate-400" size={18} />
+            <input
+              type="text"
+              value={dniFilter}
+              onChange={(e) => setDniFilter(e.target.value)}
+              className="w-full rounded-2xl border border-slate-200 pl-12 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#820000]/10 outline-none transition-all"
+              placeholder="Buscar por DNI..."
+            />
+          </div>
+          <div className="relative flex-1">
+            <Mail className="absolute left-4 top-3 text-slate-400" size={18} />
+            <input
+              type="text"
+              value={correoFilter}
+              onChange={(e) => setCorreoFilter(e.target.value)}
+              className="w-full rounded-2xl border border-slate-200 pl-12 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#820000]/10 outline-none transition-all"
+              placeholder="Buscar por correo..."
+            />
           </div>
           <button
-            type="button"
             onClick={() => void loadUsers()}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            className="p-3 rounded-2xl border border-slate-200 text-slate-600 hover:bg-white hover:text-[#820000] transition-all"
           >
-            Recargar
+            <RefreshCw size={20} className={isLoadingList ? 'animate-spin' : ''} />
           </button>
         </div>
 
-        {listError && <p className="mt-3 text-sm text-rose-600">{listError}</p>}
-
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <input
-            type="text"
-            value={dniFilter}
-            onChange={(e) => setDniFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="Filtrar por DNI"
-          />
-          <input
-            type="text"
-            value={correoFilter}
-            onChange={(e) => setCorreoFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            placeholder="Filtrar por correo"
-          />
-        </div>
-
-        <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
-          <table className="min-w-full divide-y divide-slate-200 bg-white text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-50/50 border-b border-slate-100">
               <tr>
-                <th className="px-3 py-2">ID</th>
-                <th className="px-3 py-2">DNI</th>
-                <th className="px-3 py-2">Nombres</th>
-                <th className="px-3 py-2">Correo</th>
-                <th className="px-3 py-2">Tipo</th>
-                <th className="px-3 py-2">Estado</th>
-                <th className="px-3 py-2">Acciones</th>
+                <th className="px-6 py-4">Usuario</th>
+                <th className="px-6 py-4">Identificación</th>
+                <th className="px-6 py-4">Contacto</th>
+                <th className="px-6 py-4">Rol / Tipo</th>
+                <th className="px-6 py-4">Estado</th>
+                <th className="px-6 py-4 text-center">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {!isLoadingList && paginatedUsers.length === 0 && (
-                <tr>
-                  <td className="px-3 py-4 text-center text-slate-500" colSpan={7}>
-                    Sin registros.
+            <tbody className="divide-y divide-slate-100">
+              {isLoadingList ? (
+                <tr><td colSpan={6} className="px-6 py-10 text-center text-slate-400">Cargando base de datos...</td></tr>
+              ) : paginatedUsers.length === 0 ? (
+                <tr><td colSpan={6} className="px-6 py-10 text-center text-slate-400">No se encontraron resultados.</td></tr>
+              ) : paginatedUsers.map((user) => (
+                <tr key={user.n_id_usuario} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="font-bold text-slate-800">{`${user.x_nombres} ${user.x_ape_paterno}`}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">ID: {user.n_id_usuario}</div>
                   </td>
-                </tr>
-              )}
-              {isLoadingList && (
-                <tr>
-                  <td className="px-3 py-4 text-center text-slate-500" colSpan={7}>
-                    Cargando listado...
-                  </td>
-                </tr>
-              )}
-              {paginatedUsers.map((user) => (
-                <tr key={user.n_id_usuario}>
-                  <td className="px-3 py-2 font-medium">{user.n_id_usuario}</td>
-                  <td className="px-3 py-2">{user.c_dni}</td>
-                  <td className="px-3 py-2">{`${user.x_ape_paterno} ${user.x_ape_materno} ${user.x_nombres}`.trim()}</td>
-                  <td className="px-3 py-2">{user.x_correo || '-'}</td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`inline-flex rounded-full border px-2 py-1 text-xs font-semibold ${getUserTypeBadgeClass(
-                        user.n_id_tipo
-                      )}`}
-                      title={`Tipo ${user.n_id_tipo}`}
-                    >
-                      {getUserTypeName(user.n_id_tipo)}
+                  <td className="px-6 py-4 font-medium text-slate-600">{user.c_dni}</td>
+                  <td className="px-6 py-4 text-slate-500">{user.x_correo || '-'}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold border ${USER_TYPES[user.n_id_tipo]?.badgeClass || ''}`}>
+                      {USER_TYPES[user.n_id_tipo]?.name || 'Invitado'}
                     </span>
                   </td>
-                  <td className="px-3 py-2">{user.l_activo}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-6 py-4">
+                    <span className={`h-2.5 w-2.5 rounded-full inline-block mr-2 ${user.l_activo === 'S' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                    <span className="text-xs font-medium uppercase">{user.l_activo === 'S' ? 'Activo' : 'Inactivo'}</span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
                     <button
-                      type="button"
                       onClick={() => startEditUser(user)}
-                      className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                      className="p-2 rounded-xl text-slate-400 hover:text-[#820000] hover:bg-[#820000]/5 transition-all"
                     >
-                      Editar
+                      <Edit3 size={18} />
                     </button>
                   </td>
                 </tr>
@@ -417,153 +269,175 @@ export default function UsersPage() {
           </table>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
-          <p className="text-xs text-slate-500">
-            Página {currentPage} de {totalPages}
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
+        {/* PAGINACIÓN */}
+        <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Pág {currentPage} de {totalPages}
+          </div>
+          <div className="flex items-center gap-2">
             <button
-              type="button"
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-50"
+              onClick={() => setCurrentPage(p => p - 1)}
+              className="p-2 rounded-xl border border-slate-200 disabled:opacity-30 hover:bg-white transition-all"
             >
-              Anterior
-            </button>
-            <button
-              type="button"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-50"
-            >
-              Siguiente
+              <ChevronLeft size={18} />
             </button>
             <input
               type="number"
-              min={1}
-              max={totalPages}
               value={goToPageInput}
               onChange={(e) => setGoToPageInput(e.target.value)}
-              className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-xs"
+              onBlur={() => setCurrentPage(Math.min(totalPages, Math.max(1, Number(goToPageInput))))}
+              className="w-12 text-center text-xs font-bold py-2 rounded-xl border border-slate-200 outline-none focus:border-[#820000]"
             />
             <button
-              type="button"
-              onClick={() => {
-                const target = Number(goToPageInput);
-                if (Number.isNaN(target)) {
-                  return;
-                }
-                setCurrentPage(Math.min(totalPages, Math.max(1, target)));
-              }}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="p-2 rounded-xl border border-slate-200 disabled:opacity-30 hover:bg-white transition-all"
             >
-              Ir a página
+              <ChevronRight size={18} />
             </button>
           </div>
         </div>
       </section>
 
-      {editingUserId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#820000]/30 p-4 backdrop-blur-sm">
-          <section className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-slate-900">Actualizar Usuario #{editingUserId}</h3>
-            <p className="mt-1 text-sm text-slate-500">Editar datos del usuario seleccionado</p>
-
-            <form onSubmit={handleUpdateUser} className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <select
-                value={editForm.n_id_tipo}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, n_id_tipo: Number(e.target.value) || 1 }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                required
+      {/* MODAL CREAR / EDITAR */}
+      {(isCreateModalOpen || editingUserId !== null) && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300" 
+            onClick={() => { setIsCreateModalOpen(false); setEditingUserId(null); }} 
+          />
+          <section className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-[#820000] rounded-2xl text-white shadow-lg shadow-[#820000]/30">
+                  {isCreateModalOpen ? <UserPlus size={24} /> : <Edit3 size={24} />}
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">
+                    {isCreateModalOpen ? 'Nuevo Registro' : `Editar Usuario #${editingUserId}`}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium uppercase tracking-tighter">Sistema de Gestión Judicial</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setIsCreateModalOpen(false); setEditingUserId(null); }}
+                className="p-2 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
               >
-                {!USER_TYPES[editForm.n_id_tipo] && <option value={editForm.n_id_tipo}>{`Tipo ${editForm.n_id_tipo}`}</option>}
-                {USER_TYPE_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
+                <X size={24} />
+              </button>
+            </div>
+
+            <form 
+              onSubmit={isCreateModalOpen ? handleCreate : handleUpdateUser} 
+              className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Rol del Usuario</label>
+                <select
+                  value={isCreateModalOpen ? form.n_id_tipo : editForm.n_id_tipo}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    isCreateModalOpen ? setForm(p => ({...p, n_id_tipo: val})) : setEditForm(p => ({...p, n_id_tipo: val}));
+                  }}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium focus:ring-4 focus:ring-[#820000]/5 outline-none"
+                  required
+                >
+                  {USER_TYPE_OPTIONS.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Documento (DNI)</label>
+                <input
+                  type="text"
+                  maxLength={8}
+                  value={isCreateModalOpen ? form.c_dni : editForm.c_dni}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    isCreateModalOpen ? setForm(p => ({...p, c_dni: val})) : setEditForm(p => ({...p, c_dni: val}));
+                  }}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:ring-4 focus:ring-[#820000]/5 outline-none"
+                  placeholder="8 dígitos"
+                  required
+                />
+              </div>
+
               <input
                 type="text"
-                value={editForm.c_dni}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, c_dni: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="c_dni"
-                required
-              />
-              <input
-                type="text"
-                value={editForm.x_ape_paterno}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, x_ape_paterno: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="Apellido paterno"
-                required
-              />
-              <input
-                type="text"
-                value={editForm.x_ape_materno}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, x_ape_materno: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="Apellido materno"
-                required
-              />
-              <input
-                type="text"
-                value={editForm.x_nombres}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, x_nombres: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
                 placeholder="Nombres"
+                value={isCreateModalOpen ? form.x_nombres : editForm.x_nombres}
+                onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, x_nombres: e.target.value})) : setEditForm(p => ({...p, x_nombres: e.target.value}))}
+                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
                 required
               />
-              <input
-                type="text"
-                value={editForm.c_telefono}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, c_telefono: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="Teléfono"
-                required
-              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="Ap. Paterno"
+                  value={isCreateModalOpen ? form.x_ape_paterno : editForm.x_ape_paterno}
+                  onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, x_ape_paterno: e.target.value})) : setEditForm(p => ({...p, x_ape_paterno: e.target.value}))}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Ap. Materno"
+                  value={isCreateModalOpen ? form.x_ape_materno : editForm.x_ape_materno}
+                  onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, x_ape_materno: e.target.value})) : setEditForm(p => ({...p, x_ape_materno: e.target.value}))}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                  required
+                />
+              </div>
+
               <input
                 type="email"
-                value={editForm.x_correo}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, x_correo: e.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm md:col-span-2"
-                placeholder="Correo"
+                placeholder="Correo Electrónico"
+                value={isCreateModalOpen ? form.x_correo : editForm.x_correo}
+                onChange={(e) => isCreateModalOpen ? setForm(p => ({...p, x_correo: e.target.value})) : setEditForm(p => ({...p, x_correo: e.target.value}))}
+                className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm md:col-span-2"
                 required
               />
-              <select
-                value={editForm.l_activo}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, l_activo: e.target.value as 'S' | 'N' }))}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              >
-                <option value="S">Activo (S)</option>
-                <option value="N">Inactivo (N)</option>
-              </select>
 
-              <div className="flex items-center gap-2">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Estado de Cuenta</label>
+                <select
+                  value={isCreateModalOpen ? form.l_activo : editForm.l_activo}
+                  onChange={(e) => {
+                    const val = e.target.value as 'S' | 'N';
+                    isCreateModalOpen ? setForm(p => ({...p, l_activo: val})) : setEditForm(p => ({...p, l_activo: val}));
+                  }}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                >
+                  <option value="S">ACTIVO</option>
+                  <option value="N">INACTIVO</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-2 flex gap-4 mt-4">
                 <button
                   type="submit"
-                  disabled={isUpdating}
-                  className="rounded-lg bg-[#820000] px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-70"
+                  disabled={isCreating || isUpdating}
+                  className="flex-1 bg-[#820000] text-white font-bold py-4 rounded-2xl hover:bg-slate-900 transition-all shadow-xl shadow-[#820000]/20 disabled:opacity-50"
                 >
-                  {isUpdating ? 'Actualizando...' : 'Guardar Cambios'}
+                  {isCreating || isUpdating ? 'Procesando...' : isCreateModalOpen ? 'Guardar Usuario' : 'Actualizar Datos'}
                 </button>
                 <button
                   type="button"
-                  onClick={cancelEditUser}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  onClick={() => { setIsCreateModalOpen(false); setEditingUserId(null); }}
+                  className="px-8 text-slate-500 font-bold hover:bg-slate-50 rounded-2xl transition-all"
                 >
-                  Cancelar
+                  Cerrar
                 </button>
               </div>
-            </form>
 
-            {updateError && <p className="mt-3 text-sm text-rose-600">{updateError}</p>}
-            {updatedUser && (
-              <pre className="mt-4 overflow-auto rounded-lg bg-[#820000] p-3 text-xs text-slate-100">
-                {JSON.stringify(updatedUser, null, 2)}
-              </pre>
-            )}
+              {(createError || updateError) && (
+                <div className="md:col-span-2 p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold text-center">
+                  {createError || updateError}
+                </div>
+              )}
+            </form>
           </section>
         </div>
       )}
