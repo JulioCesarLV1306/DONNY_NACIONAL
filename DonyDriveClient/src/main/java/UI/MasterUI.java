@@ -15,53 +15,59 @@ import util.Constants;
 import util.Util;
 
 /**
- * @author Diego Baes - Modernized UI
+ * @author DONNY System - Modernized UI
  */
 public class MasterUI extends javax.swing.JFrame {
 
     private final DriveService driveService;
-    BitacoraService bitacoraService;
+    private final BitacoraService bitacoraService;
     private static int contadorPeticiones = 0;
 
-    private final DefaultListModel listModel;
+    private final DefaultListModel<String> listModel;
     private static Modulo modulo;
 
     public MasterUI(Modulo modulo) {
         this.driveService = new DriveService();
         this.bitacoraService = new BitacoraService();
         this.modulo = modulo;
+        this.listModel = new DefaultListModel<>();
         
         initComponents();
-        
-        // --- FIX VISUAL FORZADO PARA EL BOTÓN DESCONECTAR ---
-        // Esto le quita el renderizado nativo de Windows y lo hace completamente plano
-        btn_desconectar.setBackground(new java.awt.Color(255, 255, 255)); // Fondo blanco absoluto
-        btn_desconectar.setForeground(new java.awt.Color(111, 1, 0));     // Texto rojo oscuro
-        btn_desconectar.setContentAreaFilled(false);                      // Apaga el botón 3D de Windows
-        btn_desconectar.setOpaque(true);                                  // Obliga a pintar el fondo blanco
-        btn_desconectar.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1)); // Quita el borde gris por defecto
-        // ----------------------------------------------------
-
-        this.listModel = new DefaultListModel();
+        applyModernStyles();
         initConfig();
         cargarDiscos();
         cargarHoraInicioSesion();
+    }
+
+    private void applyModernStyles() {
+        // Estilo forzado para el botón desconectar (Outline Style)
+        btn_desconectar.setBackground(new Color(255, 255, 255)); 
+        btn_desconectar.setForeground(new Color(130, 0, 0)); // Rojo DONNY
+        btn_desconectar.setContentAreaFilled(false);
+        btn_desconectar.setOpaque(true);
+        btn_desconectar.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(130, 0, 0), 1));
+        
+        // Estilos de la lista de discos
+        lst_discos.setSelectionBackground(new Color(130, 0, 0));
+        lst_discos.setSelectionForeground(new Color(255, 255, 255));
     }
 
     private void initConfig() {
         this.setLocationRelativeTo(null);
         this.setResizable(false);
         this.setTitle("TERMINAL DONNY " + Constants.VERSION_CLIENT);
-        pnl_root.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff), 2));
+        pnl_root.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(221, 221, 221), 1));
+        
         txt_ipclient.setText(modulo.getCPcIp());
         txt_nombreMaquina.setText(modulo.getCPcUsuario());
-        lbl_version.setText(Constants.VERSION_CLIENT);
+        lbl_version.setText(" v" + Constants.VERSION_CLIENT + " ");
     }
 
     private void cargarDiscos() {
         List<Drive> lista = driveService.getListaDiscos();
+        listModel.clear();
         for (Drive drive : lista) {
-            String label = drive.getNombre();
+            String label = "  " + drive.getNombre();
             listModel.addElement(label);
         }
         lst_discos.setModel(listModel);
@@ -77,10 +83,10 @@ public class MasterUI extends javax.swing.JFrame {
     }
 
     public static Modulo conectarModo() {
-        txt_conexion.setText("\u25CF  CONECTADO");
-        txt_conexion.setForeground(new Color(0xffffff));
-        txt_conexion.setBackground(new Color(0x6f0100));
-        txt_conexion.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff)));
+        txt_conexion.setText("●  SISTEMA CONECTADO Y EN LÍNEA");
+        txt_conexion.setForeground(new Color(40, 167, 69)); // Verde Éxito
+        txt_conexion.setBackground(new Color(232, 245, 233)); // Fondo verde suave
+        txt_conexion.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(40, 167, 69)));
         return modulo;
     }
 
@@ -121,12 +127,12 @@ public class MasterUI extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setResizable(false);
         setPreferredSize(new java.awt.Dimension(720, 460));
-        getContentPane().setBackground(new Color(0x880201));
+        getContentPane().setBackground(new Color(0xffffff));
 
-        pnl_root.setBackground(new Color(0x880201));
+        pnl_root.setBackground(new Color(0xffffff));
         pnl_root.setPreferredSize(new java.awt.Dimension(720, 460));
 
-        pnl_header.setBackground(new Color(0x6f0100));
+        pnl_header.setBackground(new Color(0x820000));
         pnl_header.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0xffffff)));
 
         lbl_header_dots.setFont(new java.awt.Font("Consolas", 0, 18)); // NOI18N
@@ -163,24 +169,24 @@ public class MasterUI extends javax.swing.JFrame {
                 .addComponent(lbl_version))
         );
 
-        pnl_identity.setBackground(new Color(0x6f0100));
-        pnl_identity.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff)));
+        pnl_identity.setBackground(new Color(0xf8f9fa));
+        pnl_identity.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xdddddd)));
 
-        lbl_maq_label.setFont(new java.awt.Font("Consolas", 0, 10)); // NOI18N
-        lbl_maq_label.setForeground(new Color(0xffffff));
+        lbl_maq_label.setFont(new java.awt.Font("Consolas", 1, 10)); // NOI18N
+        lbl_maq_label.setForeground(new Color(0x444444));
         lbl_maq_label.setText("MODULO / MAQUINA");
 
         txt_nombreMaquina.setFont(new java.awt.Font("Consolas", 1, 18)); // NOI18N
-        txt_nombreMaquina.setForeground(new Color(0xffffff));
+        txt_nombreMaquina.setForeground(new Color(0x820000));
         txt_nombreMaquina.setText("PC-NOMBRE");
 
-        lbl_ip_label.setFont(new java.awt.Font("Consolas", 0, 10)); // NOI18N
-        lbl_ip_label.setForeground(new Color(0xffffff));
+        lbl_ip_label.setFont(new java.awt.Font("Consolas", 1, 10)); // NOI18N
+        lbl_ip_label.setForeground(new Color(0x444444));
         lbl_ip_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lbl_ip_label.setText("DIRECCION IP");
 
         txt_ipclient.setFont(new java.awt.Font("Consolas", 1, 16)); // NOI18N
-        txt_ipclient.setForeground(new Color(0xffffff));
+        txt_ipclient.setForeground(new Color(0x820000));
         txt_ipclient.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         txt_ipclient.setText("0.0.0.0");
 
@@ -213,14 +219,14 @@ public class MasterUI extends javax.swing.JFrame {
                 .addGap(6, 6, 6))
         );
 
-        pnl_status.setBackground(new Color(0x880201));
+        pnl_status.setBackground(new Color(0xffffff));
 
-        txt_conexion.setBackground(new Color(0x6f0100));
+        txt_conexion.setBackground(new Color(0xf8f9fa));
         txt_conexion.setFont(new java.awt.Font("Consolas", 1, 14)); // NOI18N
-        txt_conexion.setForeground(new Color(0xffffff));
+        txt_conexion.setForeground(new Color(0x444444));
         txt_conexion.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txt_conexion.setText("●  DESCONECTADO");
-        txt_conexion.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff)));
+        txt_conexion.setText("●  ESPERANDO CONEXIÓN...");
+        txt_conexion.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xdddddd)));
         txt_conexion.setOpaque(true);
 
         javax.swing.GroupLayout pnl_statusLayout = new javax.swing.GroupLayout(pnl_status);
@@ -229,7 +235,7 @@ public class MasterUI extends javax.swing.JFrame {
             pnl_statusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnl_statusLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(txt_conexion, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txt_conexion, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnl_statusLayout.setVerticalGroup(
@@ -240,21 +246,21 @@ public class MasterUI extends javax.swing.JFrame {
                 .addGap(4, 4, 4))
         );
 
-        pnl_metrics.setBackground(new Color(0x880201));
+        pnl_metrics.setBackground(new Color(0xffffff));
 
-        pnl_card_sesion.setBackground(new Color(0x6f0100));
-        pnl_card_sesion.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff)));
+        pnl_card_sesion.setBackground(new Color(0xf8f9fa));
+        pnl_card_sesion.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xdddddd)));
 
-        lbl_sesion_label.setFont(new java.awt.Font("Consolas", 0, 10)); // NOI18N
-        lbl_sesion_label.setForeground(new Color(0xffffff));
+        lbl_sesion_label.setFont(new java.awt.Font("Consolas", 1, 10)); // NOI18N
+        lbl_sesion_label.setForeground(new Color(0x444444));
         lbl_sesion_label.setText("INICIO DE SESION");
 
         txt_datesesion.setFont(new java.awt.Font("Consolas", 1, 22)); // NOI18N
-        txt_datesesion.setForeground(new Color(0xffffff));
+        txt_datesesion.setForeground(new Color(0x820000));
         txt_datesesion.setText("00:00");
 
         lbl_sesion_sub.setFont(new java.awt.Font("Consolas", 0, 10)); // NOI18N
-        lbl_sesion_sub.setForeground(new Color(0xffffff));
+        lbl_sesion_sub.setForeground(new Color(0x444444));
         lbl_sesion_sub.setText("Hoy");
 
         javax.swing.GroupLayout pnl_card_sesionLayout = new javax.swing.GroupLayout(pnl_card_sesion);
@@ -262,7 +268,7 @@ public class MasterUI extends javax.swing.JFrame {
         pnl_card_sesionLayout.setHorizontalGroup(
             pnl_card_sesionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnl_card_sesionLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
+                .addGap(12, 12, 12)
                 .addGroup(pnl_card_sesionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lbl_sesion_label)
                     .addComponent(txt_datesesion)
@@ -281,19 +287,19 @@ public class MasterUI extends javax.swing.JFrame {
                 .addGap(6, 6, 6))
         );
 
-        pnl_card_usb.setBackground(new Color(0x6f0100));
-        pnl_card_usb.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff)));
+        pnl_card_usb.setBackground(new Color(0xf8f9fa));
+        pnl_card_usb.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xdddddd)));
 
-        lbl_usb_label.setFont(new java.awt.Font("Consolas", 0, 10)); // NOI18N
-        lbl_usb_label.setForeground(new Color(0xffffff));
+        lbl_usb_label.setFont(new java.awt.Font("Consolas", 1, 10)); // NOI18N
+        lbl_usb_label.setForeground(new Color(0x444444));
         lbl_usb_label.setText("PETICIONES USB");
 
         txt_npeticiones.setFont(new java.awt.Font("Consolas", 1, 22)); // NOI18N
-        txt_npeticiones.setForeground(new Color(0xffffff));
+        txt_npeticiones.setForeground(new Color(0x820000));
         txt_npeticiones.setText("0");
 
         lbl_usb_sub.setFont(new java.awt.Font("Consolas", 0, 10)); // NOI18N
-        lbl_usb_sub.setForeground(new Color(0xffffff));
+        lbl_usb_sub.setForeground(new Color(0x444444));
         lbl_usb_sub.setText("En esta sesion");
 
         javax.swing.GroupLayout pnl_card_usbLayout = new javax.swing.GroupLayout(pnl_card_usb);
@@ -301,7 +307,7 @@ public class MasterUI extends javax.swing.JFrame {
         pnl_card_usbLayout.setHorizontalGroup(
             pnl_card_usbLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnl_card_usbLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
+                .addGap(12, 12, 12)
                 .addGroup(pnl_card_usbLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lbl_usb_label)
                     .addComponent(txt_npeticiones)
@@ -335,13 +341,13 @@ public class MasterUI extends javax.swing.JFrame {
             .addComponent(pnl_card_usb, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        pnl_drives.setBackground(new Color(0x6f0100));
-        pnl_drives.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff)));
+        pnl_drives.setBackground(new Color(0xf8f9fa));
+        pnl_drives.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xdddddd)));
 
-        pnl_drives_header.setBackground(new Color(0x5f0000));
+        pnl_drives_header.setBackground(new Color(0x820000));
         pnl_drives_header.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0xffffff)));
 
-        jLabel3.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Consolas", 1, 11)); // NOI18N
         jLabel3.setForeground(new Color(0xffffff));
         jLabel3.setText("DISCOS DUROS DETECTADOS");
 
@@ -356,18 +362,16 @@ public class MasterUI extends javax.swing.JFrame {
         );
         pnl_drives_headerLayout.setVerticalGroup(
             pnl_drives_headerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel3)
+            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)
         );
 
-        jScrollPane1.setBackground(new Color(0x880201));
+        jScrollPane1.setBackground(new Color(0xffffff));
         jScrollPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
 
-        lst_discos.setBackground(new Color(0x880201));
+        lst_discos.setBackground(new Color(0xffffff));
         lst_discos.setFont(new java.awt.Font("Consolas", 0, 13)); // NOI18N
-        lst_discos.setForeground(new Color(0xffffff));
+        lst_discos.setForeground(new Color(0x444444));
         lst_discos.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 8, 4, 8));
-        lst_discos.setSelectionBackground(new Color(0x6f0100));
-        lst_discos.setSelectionForeground(new Color(0xffffff));
         lst_discos.setFixedCellHeight(32);
         lst_discos.setFocusable(false);
         jScrollPane1.setViewportView(lst_discos);
@@ -385,26 +389,21 @@ public class MasterUI extends javax.swing.JFrame {
         pnl_drivesLayout.setVerticalGroup(
             pnl_drivesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnl_drivesLayout.createSequentialGroup()
-                .addComponent(pnl_drives_header, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pnl_drives_header, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(3, 3, 3)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(4, 4, 4))
         );
 
-        pnl_footer.setBackground(new Color(0x880201));
+        pnl_footer.setBackground(new Color(0xffffff));
 
-        lbl_sesion_info.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
-        lbl_sesion_info.setForeground(new Color(0xffffff));
-        lbl_sesion_info.setText("Sesion activa");
+        lbl_sesion_info.setFont(new java.awt.Font("Consolas", 1, 11)); // NOI18N
+        lbl_sesion_info.setForeground(new Color(0x444444));
+        lbl_sesion_info.setText("Sesión activa localmente");
 
-        btn_desconectar.setBackground(new Color(0xffffff));
         btn_desconectar.setFont(new java.awt.Font("Consolas", 1, 12)); // NOI18N
-        btn_desconectar.setForeground(new Color(0x6f0100));
         btn_desconectar.setText("DESCONECTAR");
-        btn_desconectar.setContentAreaFilled(false);
         btn_desconectar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn_desconectar.setFocusPainted(false);
-        btn_desconectar.setOpaque(true);
         btn_desconectar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btn_desconectarActionPerformed(evt);
@@ -433,30 +432,30 @@ public class MasterUI extends javax.swing.JFrame {
             pnl_rootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(pnl_header, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(pnl_rootLayout.createSequentialGroup()
-                .addGap(12, 12, 12)
+                .addGap(16, 16, 16)
                 .addGroup(pnl_rootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnl_identity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pnl_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pnl_metrics, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pnl_drives, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pnl_footer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(12, 12, 12))
+                .addGap(16, 16, 16))
         );
         pnl_rootLayout.setVerticalGroup(
             pnl_rootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnl_rootLayout.createSequentialGroup()
-                .addComponent(pnl_header, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
-                .addComponent(pnl_identity, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
-                .addComponent(pnl_status, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
-                .addComponent(pnl_metrics, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
-                .addComponent(pnl_drives, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
-                .addComponent(pnl_footer, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6))
+                .addComponent(pnl_header, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(pnl_identity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(pnl_status, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(pnl_metrics, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(pnl_drives, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(pnl_footer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
