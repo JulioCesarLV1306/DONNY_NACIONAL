@@ -3,11 +3,9 @@ package UI;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.Timer;
-import util.Constants;
 
 /**
- * Pantalla de carga que se muestra mientras el cliente intenta
- * conectarse al servidor remoto.
+ * Pantalla de carga renovada: Fondo blanco con acentos en rojo institucional.
  */
 public class LoadingUI extends javax.swing.JFrame {
 
@@ -24,6 +22,11 @@ public class LoadingUI extends javax.swing.JFrame {
     private int msgIndex = 0;
     private Timer msgTimer;
 
+    // Paleta de colores DONNY Modern
+    private final Color RED_DONNY = new Color(0x820000); // Rojo institucional
+    private final Color WHITE_BG = new Color(0xFFFFFF);  // Blanco puro
+    private final Color GRAY_TEXT = new Color(0x666666); // Gris para info secundaria
+
     public LoadingUI() {
         initComponents();
         initConfig();
@@ -33,21 +36,17 @@ public class LoadingUI extends javax.swing.JFrame {
     private void initConfig() {
         this.setLocationRelativeTo(null);
         this.setResizable(false);
-        // Borde superior blanco
-        pnl_border.setBorder(javax.swing.BorderFactory.createMatteBorder(2, 1, 1, 1,
-                new Color(0xffffff)));
+        // Borde exterior sutil en rojo
+        pnl_border.setBorder(javax.swing.BorderFactory.createLineBorder(RED_DONNY, 1));
     }
 
-    /** Arranca el spinner de caracteres y el rotador de mensajes */
     private void startAnimations() {
-        // Spinner de caracteres braille (~100ms por frame)
         spinnerTimer = new Timer(100, e -> {
             lbl_spinner.setText(SPINNER_FRAMES[spinnerFrame % SPINNER_FRAMES.length]);
             spinnerFrame++;
         });
         spinnerTimer.start();
 
-        // Rotar mensajes de estado cada 2.5 s
         msgTimer = new Timer(2500, e -> {
             msgIndex = (msgIndex + 1) % STATUS_MSGS.length;
             txt_inf.setText(STATUS_MSGS[msgIndex]);
@@ -55,48 +54,42 @@ public class LoadingUI extends javax.swing.JFrame {
         msgTimer.start();
     }
 
-    /** Detiene las animaciones (llamar antes de cerrar o al conectar) */
     public void stopAnimations() {
         if (spinnerTimer != null) spinnerTimer.stop();
-        if (msgTimer    != null) msgTimer.stop();
+        if (msgTimer != null) msgTimer.stop();
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        pnl_border       = new javax.swing.JPanel();
-        pnl_header       = new javax.swing.JPanel();
-        lbl_header_dots  = new javax.swing.JLabel();
+        pnl_border = new javax.swing.JPanel();
+        pnl_header = new javax.swing.JPanel();
+        lbl_header_dots = new javax.swing.JLabel();
         lbl_header_title = new javax.swing.JLabel();
-        lbl_spinner      = new javax.swing.JLabel();
-        lbl_titulo       = new javax.swing.JLabel();
-        prg_barra        = new javax.swing.JProgressBar();
-        txt_inf          = new javax.swing.JLabel();
-        btn_cancelar     = new javax.swing.JButton();
+        lbl_spinner = new javax.swing.JLabel();
+        lbl_titulo = new javax.swing.JLabel();
+        prg_barra = new javax.swing.JProgressBar();
+        txt_inf = new javax.swing.JLabel();
+        btn_cancelar = new javax.swing.JButton();
 
-        // ── Ventana ────────────────────────────────────────────────
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setUndecorated(true);
-        setResizable(false);
         setType(java.awt.Window.Type.UTILITY);
-        getContentPane().setBackground(new Color(0x880201));
+        getContentPane().setBackground(WHITE_BG);
 
-        // ── Panel principal ────────────────────────────────────────
-        pnl_border.setBackground(new Color(0x880201));
+        // -- Panel Principal --
+        pnl_border.setBackground(WHITE_BG);
         pnl_border.setPreferredSize(new java.awt.Dimension(520, 280));
 
-        // ── Header bar ─────────────────────────────────────────────
-        pnl_header.setBackground(new Color(0x6f0100));
-        pnl_header.setBorder(javax.swing.BorderFactory.createMatteBorder(
-                0, 0, 1, 0, new Color(0xffffff)));
-
+        // -- Header (Rojo sólido) --
+        pnl_header.setBackground(RED_DONNY);
+        
         lbl_header_dots.setFont(new Font("Consolas", Font.PLAIN, 18));
-        lbl_header_dots.setForeground(new Color(0xffffff));
+        lbl_header_dots.setForeground(WHITE_BG);
         lbl_header_dots.setText("● ● ●");
 
-        lbl_header_title.setFont(new Font("Consolas", Font.PLAIN, 11));
-        lbl_header_title.setForeground(new Color(0xffffff));
+        lbl_header_title.setFont(new Font("Consolas", Font.BOLD, 11));
+        lbl_header_title.setForeground(WHITE_BG);
         lbl_header_title.setText("TERMINAL DONNY — INIT");
 
         javax.swing.GroupLayout headerLayout = new javax.swing.GroupLayout(pnl_header);
@@ -104,126 +97,103 @@ public class LoadingUI extends javax.swing.JFrame {
         headerLayout.setHorizontalGroup(
             headerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(headerLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(14, 14, 14)
                 .addComponent(lbl_header_dots)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 0, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 250, Short.MAX_VALUE)
                 .addComponent(lbl_header_title)
-                .addContainerGap())
+                .addGap(14, 14, 14))
         );
         headerLayout.setVerticalGroup(
             headerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-            .addComponent(lbl_header_dots)
-            .addComponent(lbl_header_title)
+            .addComponent(lbl_header_dots, 36, 36, 36)
+            .addComponent(lbl_header_title, 36, 36, 36)
         );
 
-        // ── Spinner ────────────────────────────────────────────────
-        lbl_spinner.setFont(new Font("Consolas", Font.PLAIN, 28));
-        lbl_spinner.setForeground(new Color(0xffffff));
+        // -- Spinner (Rojo) --
+        lbl_spinner.setFont(new Font("Consolas", Font.PLAIN, 32));
+        lbl_spinner.setForeground(RED_DONNY);
         lbl_spinner.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lbl_spinner.setText(SPINNER_FRAMES[0]);
 
-        // ── Título ─────────────────────────────────────────────────
-        lbl_titulo.setFont(new Font("Consolas", Font.BOLD, 26));
-        lbl_titulo.setForeground(new Color(0xffffff));
+        // -- Título (Rojo) --
+        lbl_titulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lbl_titulo.setForeground(RED_DONNY);
         lbl_titulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lbl_titulo.setText("CONECTANDO...");
 
-        // ── Barra de progreso ──────────────────────────────────────
+        // -- Barra de Progreso (Fondo blanco, frente rojo) --
         prg_barra.setIndeterminate(true);
-        prg_barra.setBackground(new Color(0x6f0100));
-        prg_barra.setForeground(new Color(0xffffff));
-        prg_barra.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff)));
-        prg_barra.setBorderPainted(true);
-        prg_barra.setStringPainted(false);
-        prg_barra.setPreferredSize(new java.awt.Dimension(480, 6));
+        prg_barra.setBackground(new Color(0xF2F2F2));
+        prg_barra.setForeground(RED_DONNY);
+        prg_barra.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xDDDDDD)));
 
-        // ── Mensaje de estado ──────────────────────────────────────
-        txt_inf.setFont(new Font("Consolas", Font.PLAIN, 12));
-        txt_inf.setForeground(new Color(0xffffff));
+        // -- Texto de Información (Gris oscuro) --
+        txt_inf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txt_inf.setForeground(GRAY_TEXT);
         txt_inf.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txt_inf.setText(STATUS_MSGS[0]);
 
-        // ── Botón cancelar ─────────────────────────────────────────
-        btn_cancelar.setBackground(new Color(0x6f0100));
-        btn_cancelar.setFont(new Font("Consolas", Font.BOLD, 12));
-        btn_cancelar.setForeground(new Color(0xffffff));
-        btn_cancelar.setText("✕  CANCELAR");
-        btn_cancelar.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(0xffffff)));
-        btn_cancelar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn_cancelar.setContentAreaFilled(true);
+        // -- Botón Cancelar (Outline Rojo) --
+        btn_cancelar.setBackground(WHITE_BG);
+        btn_cancelar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btn_cancelar.setForeground(RED_DONNY);
+        btn_cancelar.setText("CANCELAR");
+        btn_cancelar.setBorder(javax.swing.BorderFactory.createLineBorder(RED_DONNY));
         btn_cancelar.setFocusPainted(false);
-        btn_cancelar.setPreferredSize(new java.awt.Dimension(140, 32));
-        btn_cancelar.addActionListener(evt -> btn_cancelarActionPerformed(evt));
+        btn_cancelar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
-        // ── Layout del panel principal ─────────────────────────────
+        // -- Layout General --
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(pnl_border);
         pnl_border.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pnl_header, javax.swing.GroupLayout.DEFAULT_SIZE,
-                    javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pnl_header, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(20, 20)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(lbl_spinner,  javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE, Short.MAX_VALUE)
-                    .addComponent(lbl_titulo,   javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE, Short.MAX_VALUE)
-                    .addComponent(prg_barra,    javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE, Short.MAX_VALUE)
-                    .addComponent(txt_inf,      javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE, Short.MAX_VALUE)
-                    .addComponent(btn_cancelar, javax.swing.GroupLayout.PREFERRED_SIZE,
-                            javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(20, 20))
+                .addGap(40, 40, 40)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lbl_spinner, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbl_titulo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(prg_barra, javax.swing.GroupLayout.DEFAULT_SIZE, 440, Short.MAX_VALUE)
+                    .addComponent(txt_inf, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(40, 40, 40))
+            .addGroup(javax.swing.GroupLayout.Alignment.CENTER, layout.createSequentialGroup()
+                .addComponent(btn_cancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
-            layout.createSequentialGroup()
-                .addComponent(pnl_header, javax.swing.GroupLayout.PREFERRED_SIZE, 36,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24)
-                .addComponent(lbl_spinner,  javax.swing.GroupLayout.PREFERRED_SIZE, 32,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(14)
-                .addComponent(lbl_titulo,   javax.swing.GroupLayout.PREFERRED_SIZE, 40,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(16)
-                .addComponent(prg_barra,    javax.swing.GroupLayout.PREFERRED_SIZE, 6,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12)
-                .addComponent(txt_inf,      javax.swing.GroupLayout.PREFERRED_SIZE, 20,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18)
-                .addComponent(btn_cancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 32,
-                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20)
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(pnl_header, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30)
+                .addComponent(lbl_spinner)
+                .addGap(10, 10, 10)
+                .addComponent(lbl_titulo)
+                .addGap(20, 20, 20)
+                .addComponent(prg_barra, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(txt_inf)
+                .addGap(25, 25, 25)
+                .addComponent(btn_cancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
-        // ── Layout raíz ────────────────────────────────────────────
         javax.swing.GroupLayout rootLayout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(rootLayout);
-        rootLayout.setHorizontalGroup(
-            rootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pnl_border)
-        );
-        rootLayout.setVerticalGroup(
-            rootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pnl_border)
-        );
+        rootLayout.setHorizontalGroup(rootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(pnl_border, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+        rootLayout.setVerticalGroup(rootLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(pnl_border, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
     private void btn_cancelarActionPerformed(java.awt.event.ActionEvent evt) {
         stopAnimations();
         System.exit(0);
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton     btn_cancelar;
-    private javax.swing.JLabel      lbl_header_dots;
-    private javax.swing.JLabel      lbl_header_title;
-    private javax.swing.JLabel      lbl_spinner;
-    private javax.swing.JLabel      lbl_titulo;
-    private javax.swing.JPanel      pnl_border;
-    private javax.swing.JPanel      pnl_header;
+    private javax.swing.JButton btn_cancelar;
+    private javax.swing.JLabel lbl_header_dots;
+    private javax.swing.JLabel lbl_header_title;
+    private javax.swing.JLabel lbl_spinner;
+    private javax.swing.JLabel lbl_titulo;
+    private javax.swing.JPanel pnl_border;
+    private javax.swing.JPanel pnl_header;
     private javax.swing.JProgressBar prg_barra;
-    public  static javax.swing.JLabel txt_inf;
-    // End of variables declaration//GEN-END:variables
+    public static javax.swing.JLabel txt_inf;
 }
